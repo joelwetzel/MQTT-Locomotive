@@ -7,6 +7,7 @@
 #include "physics.h"
 #include "motorDriver.h"
 #include "mqttHandler.h"
+#include "lightingDriver.h"
 
 
 /*****************  START GLOBALS SECTION ***********************************/
@@ -17,7 +18,8 @@ SimpleTimer timer;
 
 Physics physics(PHYSICS_DELTAT);
 MotorDriver motorDriver;
-MqttHandler mqttHandler(mqttClient, physics);
+LightingDriver lightingDriver(physics);
+MqttHandler mqttHandler(mqttClient, physics, lightingDriver);
 
 /*****************  END GLOBALS SECTION ***********************************/
 
@@ -27,6 +29,7 @@ void processStep()
   physics.ProcessStep();
   motorDriver.SetMotorSpeed(physics.GetSpeed());
   mqttHandler.ProcessStep();
+  lightingDriver.ProcessStep();
 }
 
 
@@ -38,9 +41,10 @@ void setup()
 
   pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
+  pinMode(IN2, OUTPUT);  
   
   mqttHandler.Setup();
+  lightingDriver.Setup();
 
   delay(10);
   

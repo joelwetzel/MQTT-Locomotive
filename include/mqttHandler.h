@@ -4,6 +4,7 @@
 #include <ArduinoOTA.h>     // https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
 
 #include "physics.h"
+#include "lightingDriver.h"
 #include "config.h"
 
 #ifndef MQTTHANDLER_H
@@ -15,6 +16,7 @@ class MqttHandler
     PubSubClient &_mqttClient;
 
     Physics &_physics;
+    LightingDriver &_lightingDriver;
 
     const char* ssid = WIFI_SSID; 
     const char* password = WIFI_PASSWORD;
@@ -31,9 +33,10 @@ class MqttHandler
     void reconnect();
     void republishCommands();
     void publish(const char *topic, float value);
+    void publish(const char *topic, int value);
 
 public:
-    MqttHandler(PubSubClient &mqttClient, Physics &physics);
+    MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver);
 
     void Setup();
     void Loop();

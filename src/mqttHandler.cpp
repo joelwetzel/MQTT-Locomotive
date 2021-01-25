@@ -1,7 +1,7 @@
 #include "mqttHandler.h"
 
-MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics)
-    : _mqttClient(mqttClient), _physics(physics)
+MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver)
+    : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver)
 {
     _lastEngine = -1;
     _lastSpeed = -1;
@@ -26,7 +26,10 @@ void MqttHandler::Setup()
         Serial.print("] ");
         payload[length] = '\0';
         String newPayload = String((char *)payload);
+
         float floatPayload = newPayload.toFloat();
+        int intPayload = newPayload.toInt();
+
         Serial.println(newPayload);
         Serial.println();
         newPayload.toCharArray(charPayload, newPayload.length() + 1);
@@ -43,8 +46,18 @@ void MqttHandler::Setup()
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser")
         {
-            _physics.SetReverser(floatPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/reverser", floatPayload);
+            _physics.SetReverser(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/reverser", intPayload);
+        }
+        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights")
+        {
+            _lightingDriver.SetCabLights(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/cablights", intPayload);
+        }
+        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights")
+        {
+            _lightingDriver.SetHeadlights(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/headlights", intPayload);
         }
     });
 
@@ -104,6 +117,8 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/throttle");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/brake");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights");
       } 
       else 
       {
@@ -129,6 +144,8 @@ void MqttHandler::republishCommands()
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/throttle", _physics.GetThrottle());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/brake", _physics.GetBrake());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser", _physics.GetReverser());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights", _lightingDriver.GetCabLights());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights", _lightingDriver.GetHeadlights());
 }
 
 
@@ -177,6 +194,16 @@ void MqttHandler::ProcessStep()
 
 
 void MqttHandler::publish(const char *topic, float value)
+{
+    char charArray[50];
+
+    String tempStr = String(value);
+    tempStr.toCharArray(charArray, tempStr.length() + 1);
+    _mqttClient.publish(topic, charArray);
+}
+
+
+void MqttHandler::publish(const char *topic, int value)
 {
     char charArray[50];
 
