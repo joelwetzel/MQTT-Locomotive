@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "physics.h"
+#include "batteryDriver.h"
 
 #ifndef LIGHTINGDRIVER_H
 #define LIGHTINGDRIVER_H
@@ -24,12 +25,14 @@ enum HeadlightModes
 class LightingDriver
 {
     Physics &_physics;
+    BatteryDriver &_batteryDriver;
+
 
     bool _cabLightsOn;
     HeadlightModes _headlightMode;
 
 public:
-    LightingDriver(Physics &physics);
+    LightingDriver(Physics &physics, BatteryDriver &batteryDriver);
 
     void SetCabLights(bool on);
     bool GetCabLights();

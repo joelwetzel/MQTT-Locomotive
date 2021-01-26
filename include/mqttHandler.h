@@ -30,7 +30,8 @@ class MqttHandler
 
     bool boot = true;
 
-    float _lastEngine;
+    bool _lastMasterSwitch;
+    float _lastEngineRpms;
     float _lastSpeed;
     bool _lastBell;
     bool _lastHorn;
