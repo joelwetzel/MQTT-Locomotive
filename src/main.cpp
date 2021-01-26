@@ -9,6 +9,7 @@
 #include "mqttHandler.h"
 #include "lightingDriver.h"
 #include "soundDriver.h"
+#include "batteryDriver.h"
 
 
 /*****************  START GLOBALS SECTION ***********************************/
@@ -21,7 +22,8 @@ Physics physics(PHYSICS_DELTAT);
 MotorDriver motorDriver;
 LightingDriver lightingDriver(physics);
 SoundDriver soundDriver;
-MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundDriver);
+BatteryDriver batteryDriver;
+MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundDriver, batteryDriver);
 
 /*****************  END GLOBALS SECTION ***********************************/
 
@@ -49,6 +51,7 @@ void setup()
   mqttHandler.Setup();
   lightingDriver.Setup();
   soundDriver.Setup();
+  batteryDriver.Setup();
 
   delay(10);
   

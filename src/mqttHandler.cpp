@@ -1,15 +1,15 @@
 #include "mqttHandler.h"
 
 
-MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver)
-    : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver), _soundDriver(soundDriver)
+MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver, BatteryDriver &batteryDriver)
+    : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver), _soundDriver(soundDriver), _batteryDriver(batteryDriver)
 {
     _lastEngine = -1;
     _lastSpeed = -1;
     _lastBell = true;
     _lastHorn = true;
 
-    _publishCounter = 0;
+    _publishCounter = 1;
 }
 
 
@@ -211,6 +211,11 @@ void MqttHandler::ProcessStep()
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", horn);
         _lastHorn = horn;
+    }
+
+    if (_publishCounter % 150 == 0)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/battery", _batteryDriver.GetVoltage());
     }
 
     if (_publishCounter % 6000 == 0)
