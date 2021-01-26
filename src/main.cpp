@@ -8,6 +8,7 @@
 #include "motorDriver.h"
 #include "mqttHandler.h"
 #include "lightingDriver.h"
+#include "soundDriver.h"
 
 
 /*****************  START GLOBALS SECTION ***********************************/
@@ -19,7 +20,8 @@ SimpleTimer timer;
 Physics physics(PHYSICS_DELTAT);
 MotorDriver motorDriver;
 LightingDriver lightingDriver(physics);
-MqttHandler mqttHandler(mqttClient, physics, lightingDriver);
+SoundDriver soundDriver;
+MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundDriver);
 
 /*****************  END GLOBALS SECTION ***********************************/
 
@@ -30,6 +32,7 @@ void processStep()
   motorDriver.SetMotorSpeed(physics.GetSpeed());
   mqttHandler.ProcessStep();
   lightingDriver.ProcessStep();
+  soundDriver.ProcessStep();
 }
 
 
@@ -45,6 +48,7 @@ void setup()
   
   mqttHandler.Setup();
   lightingDriver.Setup();
+  soundDriver.Setup();
 
   delay(10);
   

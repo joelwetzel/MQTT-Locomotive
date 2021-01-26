@@ -1,10 +1,12 @@
 #include "mqttHandler.h"
 
-MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver)
-    : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver)
+
+MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver)
+    : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver), _soundDriver(soundDriver)
 {
     _lastEngine = -1;
     _lastSpeed = -1;
+    _lastBell = true;
 
     _publishCounter = 0;
 }
@@ -58,6 +60,11 @@ void MqttHandler::Setup()
         {
             _lightingDriver.SetHeadlights(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/headlights", intPayload);
+        }
+        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell")
+        {
+            _soundDriver.SetBell(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", intPayload);
         }
     });
 
@@ -119,6 +126,7 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell");
       } 
       else 
       {
@@ -146,6 +154,7 @@ void MqttHandler::republishCommands()
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser", _physics.GetReverser());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights", _lightingDriver.GetCabLights());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights", _lightingDriver.GetHeadlights());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell", _soundDriver.GetBell());
 }
 
 
@@ -169,6 +178,7 @@ void MqttHandler::ProcessStep()
 
     float engine = _physics.GetEngine();
     float speed = _physics.GetSpeed();
+    bool bell = _soundDriver.GetBell();
 
     if (fabs(engine - _lastEngine) > 0.05 || _publishCounter % 1500 == 0)
     {
@@ -182,7 +192,13 @@ void MqttHandler::ProcessStep()
         _lastSpeed = speed;
     }
 
-    if (_publishCounter % 1500 == 0)
+    if (bell != _lastBell)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", bell);
+        _lastBell = bell;
+    }
+
+    if (_publishCounter % 6000 == 0)
     {
         republishCommands();
         _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/mqttStatus", "OK"); 
