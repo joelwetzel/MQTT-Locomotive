@@ -7,6 +7,7 @@ MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDri
     _lastEngine = -1;
     _lastSpeed = -1;
     _lastBell = true;
+    _lastHorn = true;
 
     _publishCounter = 0;
 }
@@ -65,6 +66,11 @@ void MqttHandler::Setup()
         {
             _soundDriver.SetBell(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", intPayload);
+        }
+        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn")
+        {
+            _soundDriver.SetHorn(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", intPayload);
         }
     });
 
@@ -127,6 +133,7 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn");
       } 
       else 
       {
@@ -155,6 +162,7 @@ void MqttHandler::republishCommands()
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights", _lightingDriver.GetCabLights());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights", _lightingDriver.GetHeadlights());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell", _soundDriver.GetBell());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn", _soundDriver.GetHorn());
 }
 
 
@@ -174,11 +182,12 @@ void MqttHandler::ProcessStep()
 {
     // Publish attributes to MQTT, if:
     //   - They have changed
-    //   - Or every 15 seconds
+    //   - Or every 60 seconds
 
     float engine = _physics.GetEngine();
     float speed = _physics.GetSpeed();
     bool bell = _soundDriver.GetBell();
+    bool horn = _soundDriver.GetHorn();
 
     if (fabs(engine - _lastEngine) > 0.05 || _publishCounter % 1500 == 0)
     {
@@ -196,6 +205,12 @@ void MqttHandler::ProcessStep()
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", bell);
         _lastBell = bell;
+    }
+
+    if (horn != _lastHorn)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", horn);
+        _lastHorn = horn;
     }
 
     if (_publishCounter % 6000 == 0)

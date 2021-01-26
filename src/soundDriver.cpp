@@ -4,19 +4,35 @@
 SoundDriver::SoundDriver()
 {
     _bell = false;
+    _horn = false;
     _bellCount = 0;
+    _hornCount = 0;
 }
 
 
 void SoundDriver::SetBell(bool on)
 {
     _bell = on;
+    _bellCount = 0;
 }
 
 
 bool SoundDriver::GetBell()
 {
     return _bell;
+}
+
+
+void SoundDriver::SetHorn(bool on)
+{
+    _horn = on;
+    _hornCount = 0;
+}
+
+
+bool SoundDriver::GetHorn()
+{
+    return _horn;
 }
 
 
@@ -36,6 +52,17 @@ void SoundDriver::ProcessStep()
         {
             _bell = false;
             _bellCount = 0;
+        }
+    }
+
+    // Turn off the bell after 10 seconds.
+    if (_horn)
+    {
+        _hornCount++;
+        if (_hornCount == 1000)
+        {
+            _horn = false;
+            _hornCount = 0;
         }
     }
 }
