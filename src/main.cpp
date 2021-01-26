@@ -18,11 +18,11 @@ WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 SimpleTimer timer;
 
-Physics physics(PHYSICS_DELTAT);
-MotorDriver motorDriver;
-LightingDriver lightingDriver(physics);
-SoundDriver soundDriver;
 BatteryDriver batteryDriver;
+Physics physics(batteryDriver);
+MotorDriver motorDriver;
+LightingDriver lightingDriver(physics, batteryDriver);
+SoundDriver soundDriver;
 MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundDriver, batteryDriver);
 
 /*****************  END GLOBALS SECTION ***********************************/
@@ -30,6 +30,7 @@ MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundDriver, batter
 
 void processStep()
 {
+  batteryDriver.ProcessStep();
   physics.ProcessStep();
   motorDriver.SetMotorSpeed(physics.GetSpeed());
   mqttHandler.ProcessStep();

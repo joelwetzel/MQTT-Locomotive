@@ -4,7 +4,7 @@
 MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver, BatteryDriver &batteryDriver)
     : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver), _soundDriver(soundDriver), _batteryDriver(batteryDriver)
 {
-    _lastEngine = -1;
+    _lastEngineRpms = -1;
     _lastSpeed = -1;
     _lastBell = true;
     _lastHorn = true;
@@ -72,6 +72,11 @@ void MqttHandler::Setup()
             _soundDriver.SetHorn(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", intPayload);
         }
+        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch")
+        {
+            _batteryDriver.SetMasterSwitch(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", intPayload);
+        }
     });
 
     ArduinoOTA.setHostname(USER_DEVICE_NETWORK_ID);
@@ -134,6 +139,7 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch");
       } 
       else 
       {
@@ -163,6 +169,7 @@ void MqttHandler::republishCommands()
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights", _lightingDriver.GetHeadlights());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell", _soundDriver.GetBell());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn", _soundDriver.GetHorn());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch", _batteryDriver.GetMasterSwitch());
 }
 
 
@@ -184,15 +191,16 @@ void MqttHandler::ProcessStep()
     //   - They have changed
     //   - Or every 60 seconds
 
-    float engine = _physics.GetEngine();
+    bool masterSwitch = _batteryDriver.GetMasterSwitch();
+    float engineRpms = _physics.GetEngineRpms();
     float speed = _physics.GetSpeed();
     bool bell = _soundDriver.GetBell();
     bool horn = _soundDriver.GetHorn();
 
-    if (fabs(engine - _lastEngine) > 0.05 || _publishCounter % 1500 == 0)
+    if (fabs(engineRpms - _lastEngineRpms) > 0.05 || _publishCounter % 1500 == 0)
     {
-        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engine", engine);
-        _lastEngine = engine;
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms", engineRpms);
+        _lastEngineRpms = engineRpms;
     }
 
     if ((fabs(speed - _lastSpeed) > 0.01 && _publishCounter % 50 == 0) || _publishCounter % 1500 == 0)
@@ -211,6 +219,12 @@ void MqttHandler::ProcessStep()
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", horn);
         _lastHorn = horn;
+    }
+
+    if (masterSwitch != _lastMasterSwitch)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", masterSwitch);
+        _lastMasterSwitch = masterSwitch;
     }
 
     if (_publishCounter % 150 == 0)

@@ -1,7 +1,7 @@
 #include "lightingDriver.h"
 
-LightingDriver::LightingDriver(Physics &physics)
-    : _physics(physics)
+LightingDriver::LightingDriver(Physics &physics, BatteryDriver &batteryDriver)
+    : _physics(physics), _batteryDriver(batteryDriver)
 {
     _headlightMode = HeadlightModes::Off;
     _cabLightsOn = false;
@@ -59,14 +59,15 @@ void LightingDriver::Setup()
 
 void LightingDriver::ProcessStep()
 {
-    if (_cabLightsOn)
-    {
-        digitalWrite(CAB_PIN, 1);
-    }
-    else
+    if (_batteryDriver.GetMasterSwitch() == false)
     {
         digitalWrite(CAB_PIN, 0);
+        digitalWrite(FRONT_PIN, 0);
+        digitalWrite(REAR_PIN, 0);
+        return;
     }
+
+    digitalWrite(CAB_PIN, _cabLightsOn);
     
     switch (_headlightMode)
     {

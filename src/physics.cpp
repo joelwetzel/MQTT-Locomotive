@@ -1,14 +1,14 @@
 #include "physics.h"
 
-Physics::Physics(float deltaT)
+Physics::Physics(BatteryDriver &batteryDriver)
+    : _batteryDriver(batteryDriver)
 {
-    _deltaT = deltaT;
-
     _throttle = 0.0;
-    _brake = 0.0;
-    _reverserDirection = 1;
+    _brake = 100.0;
+    _reverserDirection = 0;
 
-    _engine = 0.0;
+    _engineRpms = 0.0;
+
     _speed = 0.0;
 }
 
@@ -18,9 +18,9 @@ float Physics::GetSpeed()
     return _speed;
 }
 
-float Physics::GetEngine()
+float Physics::GetEngineRpms()
 {
-    return _engine;
+    return _engineRpms;
 }
 
 void Physics::SetThrottle(float throttle)
@@ -57,24 +57,32 @@ int Physics::GetReverser()
 void Physics::ProcessStep()
 {
     // Throttle lag
-    float engineDelta = ENGINE_DELTA * _deltaT;
-    if (_engine < _throttle - engineDelta/2.0)
+    float engineSpinup = ENGINE_SPINUP * PHYSICS_DELTAT;
+    if (_batteryDriver.GetMasterSwitch() == true)
     {
-        _engine += engineDelta;
+        if (_engineRpms < _throttle - engineSpinup/2.0)
+        {
+            _engineRpms += engineSpinup;
+        }
+        else if (_engineRpms > _throttle + engineSpinup/2.0)
+        {
+            _engineRpms -= engineSpinup;
+        }
     }
-    else if (_engine > _throttle + engineDelta/2.0)
+    else
     {
-        _engine -= engineDelta;
-    }
+        // Spin down the engine if master switch is off
+        _engineRpms -= engineSpinup;
+    }    
 
     // Engine clamping
-    if (_engine > 100.0)
+    if (_engineRpms > 100.0)
     {
-        _engine = 100.0;
+        _engineRpms = 100.0;
     }
-    else if (_engine < 0.0)
+    else if (_engineRpms < 0.0)
     {
-        _engine = 0.0;
+        _engineRpms = 0.0;
     }
 
     float resistance = 0.0;
@@ -94,7 +102,7 @@ void Physics::ProcessStep()
     // Apply resistance
     if (_speed > 0.0)
     {
-        _speed -= resistance * _deltaT;
+        _speed -= resistance * PHYSICS_DELTAT;
 
         if (_speed < 0.0)
         {
@@ -103,7 +111,7 @@ void Physics::ProcessStep()
     }
     else if (_speed < 0.0)
     {
-        _speed += resistance * _deltaT;
+        _speed += resistance * PHYSICS_DELTAT;
 
         if (_speed > 0.0)
         {
@@ -112,10 +120,13 @@ void Physics::ProcessStep()
     }
 
     // Apply engine power through reverser
-    if (_engine > 0.0 &&
-            (_speed * _reverserDirection > 0 || fabs(_speed) < 0.5))    // The transmission only allows power to be applied if the reverser is in same direction of travel.
+    if (_batteryDriver.GetMasterSwitch() == true)
     {
-        _speed += _reverserDirection * sqrt(ENGINE_POWER * _engine) * _deltaT;
+        if (_engineRpms > 0.0 &&
+                (_speed * _reverserDirection > 0 || fabs(_speed) < 0.5))    // The transmission only allows power to be applied if the reverser is in same direction of travel.
+        {
+            _speed += _reverserDirection * sqrt(ENGINE_POWER * _engineRpms) * PHYSICS_DELTAT;
+        }
     }
 }
 
