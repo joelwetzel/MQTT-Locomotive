@@ -4,15 +4,16 @@
 MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver, BatteryDriver &batteryDriver)
     : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver), _soundDriver(soundDriver), _batteryDriver(batteryDriver)
 {
-    _lastMasterSwitch = true;
-    _lastEngineOn = true;
+    _lastMasterSwitch = false;
+    _lastEngineOn = false;
     _lastEngineRpms = -1;
+    _lastReverser = 0;
     _lastSmokePercent = -1;
     _lastSpeed = -1;
-    _lastBell = true;
-    _lastHorn = true;
+    _lastBell = false;
+    _lastHorn = false;
 
-    _publishCounter = 1;
+    _publishCounter = 0;
 }
 
 
@@ -87,8 +88,8 @@ void MqttHandler::Setup()
         }
     });
 
-    ArduinoOTA.setHostname(USER_DEVICE_NETWORK_ID);
-    ArduinoOTA.begin();
+//    ArduinoOTA.setHostname(USER_DEVICE_NETWORK_ID);
+//    ArduinoOTA.begin();
 }
 
 
@@ -130,8 +131,9 @@ void MqttHandler::reconnect()
 
         if (boot)
         {
-            republishCommands();
             _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/mqttStatus", "Rebooted");
+            republishCommands();
+            ProcessStep();
             boot = false;
         }
         else
@@ -191,7 +193,7 @@ void MqttHandler::Loop()
     }
 
     _mqttClient.loop();
-    ArduinoOTA.handle();
+//    ArduinoOTA.handle();
 }
 
 
@@ -204,54 +206,61 @@ void MqttHandler::ProcessStep()
     bool masterSwitch = _batteryDriver.GetMasterSwitch();
     bool engineOn = _physics.GetEngineOn();
     float engineRpms = _physics.GetEngineRpms();
+    int reverser = _physics.GetReverser();
     float smokePercent = _physics.GetSmokePercent();
     float speed = _physics.GetSpeed();
     bool bell = _soundDriver.GetBell();
     bool horn = _soundDriver.GetHorn();
 
-    if (fabs(engineRpms - _lastEngineRpms) > 0.05 || _publishCounter % 1500 == 0)
+    if ((fabs(engineRpms - _lastEngineRpms) > 0.05 && _publishCounter % 47 == 0) || _publishCounter % 1500 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms", engineRpms);
         _lastEngineRpms = engineRpms;
     }
 
-    if (fabs(smokePercent - _lastSmokePercent) > 0.05 || _publishCounter % 1500 == 0)
+    if ((fabs(smokePercent - _lastSmokePercent) > 0.05 && _publishCounter % 50 == 0) || _publishCounter % 1500 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/smokepercent", smokePercent);
         _lastSmokePercent = smokePercent;
     }
 
-    if ((fabs(speed - _lastSpeed) > 0.01 && _publishCounter % 50 == 0) || _publishCounter % 1500 == 0)
+    if ((fabs(speed - _lastSpeed) > 0.01 && _publishCounter % 52 == 0) || _publishCounter % 1500 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/speed", speed);
         _lastSpeed = speed;
     }
 
-    if (bell != _lastBell)
+    if ((bell != _lastBell) || boot)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", bell);
         _lastBell = bell;
     }
 
-    if (horn != _lastHorn)
+    if ((horn != _lastHorn) || boot)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", horn);
         _lastHorn = horn;
     }
 
-    if (masterSwitch != _lastMasterSwitch)
+    if ((reverser != _lastReverser) || boot)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/reverser", reverser);
+        _lastReverser = reverser;
+    }
+
+    if ((masterSwitch != _lastMasterSwitch) || boot)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", masterSwitch);
         _lastMasterSwitch = masterSwitch;
     }
 
-    if (engineOn != _lastEngineOn)
+    if ((engineOn != _lastEngineOn || _publishCounter % 501 == 0) || boot)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", engineOn);
         _lastEngineOn = engineOn;
     }
 
-    if (_publishCounter % 150 == 0)
+    if (_publishCounter % 301 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/battery", _batteryDriver.GetVoltage());
     }
