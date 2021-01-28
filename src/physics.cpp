@@ -8,6 +8,7 @@ Physics::Physics(BatteryDriver &batteryDriver)
     _reverserDirection = 0;
 
     _engineRpms = 0.0;
+    _smokePercent = 0.0;
 
     _speed = 0.0;
 }
@@ -22,6 +23,24 @@ float Physics::GetEngineRpms()
 {
     return _engineRpms;
 }
+
+float Physics::GetSmokePercent()
+{
+    return _smokePercent;
+}
+
+
+
+void Physics::SetEngineOn(bool on)
+{
+    _engineOn = on;
+}
+
+bool Physics::GetEngineOn()
+{
+    return _engineOn;
+}
+
 
 void Physics::SetThrottle(float throttle)
 {
@@ -54,24 +73,32 @@ int Physics::GetReverser()
 }
 
 
-void Physics::ProcessStep()
+void Physics::processEngineStep()
 {
+    // Master switch can kill the engine
+    if (!_batteryDriver.GetMasterSwitch())
+    {
+        _engineOn = false;
+    }
+
     // Throttle lag
     float engineSpinup = ENGINE_SPINUP * PHYSICS_DELTAT;
-    if (_batteryDriver.GetMasterSwitch() == true)
+    if (_engineOn)
     {
         if (_engineRpms < _throttle - engineSpinup/2.0)
         {
+            _smokePercent = (_throttle - _engineRpms);      // This term makes more smoke the more throttle exceeds current engine spin.
             _engineRpms += engineSpinup;
         }
         else if (_engineRpms > _throttle + engineSpinup/2.0)
         {
+            _smokePercent = 0.0;
             _engineRpms -= engineSpinup;
         }
     }
     else
     {
-        // Spin down the engine if master switch is off
+        // Spin down the rpms if engine is off
         _engineRpms -= engineSpinup;
     }    
 
@@ -84,7 +111,11 @@ void Physics::ProcessStep()
     {
         _engineRpms = 0.0;
     }
+}
 
+
+void Physics::processResistanceStep()
+{
     float resistance = 0.0;
 
     // Air resistance
@@ -104,7 +135,7 @@ void Physics::ProcessStep()
     {
         _speed -= resistance * PHYSICS_DELTAT;
 
-        if (_speed < 0.0)
+        if (_speed < 0.0)       // Resistance can't change the direction of travel
         {
             _speed = 0.0;
         }
@@ -113,12 +144,16 @@ void Physics::ProcessStep()
     {
         _speed += resistance * PHYSICS_DELTAT;
 
-        if (_speed > 0.0)
+        if (_speed > 0.0)       // Resistance can't change the direction of travel
         {
             _speed = 0.0;
         }
     }
+}
 
+
+void Physics::processReverserStep()
+{
     // Apply engine power through reverser
     if (_batteryDriver.GetMasterSwitch() == true)
     {
@@ -128,6 +163,27 @@ void Physics::ProcessStep()
             _speed += _reverserDirection * sqrt(ENGINE_POWER * _engineRpms) * PHYSICS_DELTAT;
         }
     }
+}
+
+
+void Physics::clampSpeed()
+{
+    if (_speed > 100.0)
+    {
+        _speed = 100.0;
+    }
+    else if (_speed < -100.0)
+    {
+        _speed = -100.0;
+    }
+}
+
+void Physics::ProcessStep()
+{
+    processEngineStep();
+    processResistanceStep();
+    processReverserStep();
+    clampSpeed();
 }
 
 

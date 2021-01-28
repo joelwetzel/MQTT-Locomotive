@@ -18,20 +18,30 @@ class Physics
 {
     BatteryDriver &_batteryDriver;
 
+    bool _engineOn;
     float _throttle;
     float _brake;
     int _reverserDirection;
 
     float _engineRpms;
+    float _smokePercent;
 
     float _speed;
+
+    void processEngineStep();
+    void processResistanceStep();
+    void processReverserStep();
+    void clampSpeed();
 
 public:
     Physics(BatteryDriver &batteryDriver);
 
     float GetSpeed();
     float GetEngineRpms();
+    float GetSmokePercent();
 
+    void SetEngineOn(bool on);
+    bool GetEngineOn();
     void SetThrottle(float throttle);
     float GetThrottle();
     void SetBrake(float brake);

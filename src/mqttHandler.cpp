@@ -4,7 +4,10 @@
 MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver, BatteryDriver &batteryDriver)
     : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver), _soundDriver(soundDriver), _batteryDriver(batteryDriver)
 {
+    _lastMasterSwitch = true;
+    _lastEngineOn = true;
     _lastEngineRpms = -1;
+    _lastSmokePercent = -1;
     _lastSpeed = -1;
     _lastBell = true;
     _lastHorn = true;
@@ -77,6 +80,11 @@ void MqttHandler::Setup()
             _batteryDriver.SetMasterSwitch(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", intPayload);
         }
+        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon")
+        {
+            _physics.SetEngineOn(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", intPayload);
+        }
     });
 
     ArduinoOTA.setHostname(USER_DEVICE_NETWORK_ID);
@@ -140,6 +148,7 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon");
       } 
       else 
       {
@@ -170,6 +179,7 @@ void MqttHandler::republishCommands()
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell", _soundDriver.GetBell());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn", _soundDriver.GetHorn());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch", _batteryDriver.GetMasterSwitch());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon", _physics.GetEngineOn());
 }
 
 
@@ -192,7 +202,9 @@ void MqttHandler::ProcessStep()
     //   - Or every 60 seconds
 
     bool masterSwitch = _batteryDriver.GetMasterSwitch();
+    bool engineOn = _physics.GetEngineOn();
     float engineRpms = _physics.GetEngineRpms();
+    float smokePercent = _physics.GetSmokePercent();
     float speed = _physics.GetSpeed();
     bool bell = _soundDriver.GetBell();
     bool horn = _soundDriver.GetHorn();
@@ -201,6 +213,12 @@ void MqttHandler::ProcessStep()
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms", engineRpms);
         _lastEngineRpms = engineRpms;
+    }
+
+    if (fabs(smokePercent - _lastSmokePercent) > 0.05 || _publishCounter % 1500 == 0)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/smokepercent", smokePercent);
+        _lastSmokePercent = smokePercent;
     }
 
     if ((fabs(speed - _lastSpeed) > 0.01 && _publishCounter % 50 == 0) || _publishCounter % 1500 == 0)
@@ -225,6 +243,12 @@ void MqttHandler::ProcessStep()
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", masterSwitch);
         _lastMasterSwitch = masterSwitch;
+    }
+
+    if (engineOn != _lastEngineOn)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", engineOn);
+        _lastEngineOn = engineOn;
     }
 
     if (_publishCounter % 150 == 0)
