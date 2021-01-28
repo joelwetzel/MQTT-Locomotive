@@ -33,9 +33,9 @@ void processStep()
   batteryDriver.ProcessStep();
   physics.ProcessStep();
   motorDriver.SetMotorSpeed(physics.GetSpeed());
-  mqttHandler.ProcessStep();
   lightingDriver.ProcessStep();
   soundDriver.ProcessStep();
+  mqttHandler.ProcessStep();
 }
 
 
@@ -65,6 +65,5 @@ void setup()
 void loop()
 {
   mqttHandler.Loop();
-
   timer.run();
 }

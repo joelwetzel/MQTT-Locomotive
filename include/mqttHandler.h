@@ -1,7 +1,7 @@
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>    // if you get an error here you need to install the ESP8266 board manager 
 #include <ESP8266mDNS.h>    // if you get an error here you need to install the ESP8266 board manager 
-#include <ArduinoOTA.h>     // https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
+//#include <ArduinoOTA.h>     // https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
 
 #include "physics.h"
 #include "lightingDriver.h"
@@ -33,6 +33,7 @@ class MqttHandler
     bool _lastMasterSwitch;
     bool _lastEngineOn;
     float _lastEngineRpms;
+    int _lastReverser;
     float _lastSmokePercent;
     float _lastSpeed;
     bool _lastBell;

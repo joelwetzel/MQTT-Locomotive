@@ -3,6 +3,7 @@
 Physics::Physics(BatteryDriver &batteryDriver)
     : _batteryDriver(batteryDriver)
 {
+    _engineOn = false;
     _throttle = 0.0;
     _brake = 100.0;
     _reverserDirection = 0;
@@ -10,6 +11,7 @@ Physics::Physics(BatteryDriver &batteryDriver)
     _engineRpms = 0.0;
     _smokePercent = 0.0;
 
+    _previousSpeed = 0.0;
     _speed = 0.0;
 }
 
@@ -33,7 +35,10 @@ float Physics::GetSmokePercent()
 
 void Physics::SetEngineOn(bool on)
 {
-    _engineOn = on;
+    if (_batteryDriver.GetMasterSwitch())
+    {
+        _engineOn = on;
+    }
 }
 
 bool Physics::GetEngineOn()
@@ -76,7 +81,7 @@ int Physics::GetReverser()
 void Physics::processEngineStep()
 {
     // Master switch can kill the engine
-    if (!_batteryDriver.GetMasterSwitch())
+    if (_batteryDriver.GetMasterSwitch() == false)
     {
         _engineOn = false;
     }
@@ -87,12 +92,10 @@ void Physics::processEngineStep()
     {
         if (_engineRpms < _throttle - engineSpinup/2.0)
         {
-            _smokePercent = (_throttle - _engineRpms);      // This term makes more smoke the more throttle exceeds current engine spin.
             _engineRpms += engineSpinup;
         }
         else if (_engineRpms > _throttle + engineSpinup/2.0)
         {
-            _smokePercent = 0.0;
             _engineRpms -= engineSpinup;
         }
     }
@@ -166,6 +169,36 @@ void Physics::processReverserStep()
 }
 
 
+void Physics::processSmokeStep()
+{
+    float overThrottleSmokePercent = 0.0;
+    float engineWorkSmokePercent = 0.0;
+    float speedSmokePercent = 0.0;
+
+    // Smoke from throttle being ahead of engine rpms.  Unburnt fuel.
+    if (_engineOn && _throttle > _engineRpms)
+    {
+        overThrottleSmokePercent = (_throttle - _engineRpms) * SMOKE_OVERTHROTTLE_FACTOR;
+    }
+
+    // Smoke from the engine doing work, in the physics sense.  It's similar to the equation above for change in speed.
+    if (_engineOn)
+    {
+        engineWorkSmokePercent = sqrt(_engineRpms) * SMOKE_ENGINE_WORK_FACTOR;
+    }
+
+    // Make more smoke when the train is accelerating.
+    if (_engineOn && _speed > _previousSpeed)
+    {
+        speedSmokePercent = (_speed - _previousSpeed) * SMOKE_ACCELERATION_FACTOR;
+    }
+
+    _smokePercent = overThrottleSmokePercent +
+                    engineWorkSmokePercent +
+                    speedSmokePercent;
+}
+
+
 void Physics::clampSpeed()
 {
     if (_speed > 100.0)
@@ -178,12 +211,29 @@ void Physics::clampSpeed()
     }
 }
 
+
+void Physics::clampSmoke()
+{
+    if (_smokePercent > 100.0)
+    {
+        _smokePercent = 100.0;
+    }
+    else if (_smokePercent < 0.0)
+    {
+        _smokePercent = 0.0;
+    }
+}
+
 void Physics::ProcessStep()
 {
     processEngineStep();
     processResistanceStep();
     processReverserStep();
     clampSpeed();
+    processSmokeStep();
+    clampSmoke();
+    
+    _previousSpeed = _speed;
 }
 
 
