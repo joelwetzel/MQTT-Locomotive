@@ -212,19 +212,19 @@ void MqttHandler::ProcessStep()
     bool bell = _soundDriver.GetBell();
     bool horn = _soundDriver.GetHorn();
 
-    if ((fabs(engineRpms - _lastEngineRpms) > 0.05 && _publishCounter % 47 == 0) || _publishCounter % 1500 == 0)
+    if ((fabs(engineRpms - _lastEngineRpms) > 0.05 && _publishCounter % 47 == 0) || _publishCounter % 500 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms", engineRpms);
         _lastEngineRpms = engineRpms;
     }
 
-    if ((fabs(smokePercent - _lastSmokePercent) > 0.05 && _publishCounter % 50 == 0) || _publishCounter % 1500 == 0)
+    if ((fabs(smokePercent - _lastSmokePercent) > 0.05 && _publishCounter % 50 == 0) || _publishCounter % 502 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/smokepercent", smokePercent);
         _lastSmokePercent = smokePercent;
     }
 
-    if ((fabs(speed - _lastSpeed) > 0.01 && _publishCounter % 52 == 0) || _publishCounter % 1500 == 0)
+    if ((fabs(speed - _lastSpeed) > 0.01 && _publishCounter % 52 == 0) || _publishCounter % 504 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/speed", speed);
         _lastSpeed = speed;
@@ -254,18 +254,18 @@ void MqttHandler::ProcessStep()
         _lastMasterSwitch = masterSwitch;
     }
 
-    if ((engineOn != _lastEngineOn || _publishCounter % 501 == 0) || boot)
+    if ((engineOn != _lastEngineOn || _publishCounter % 301 == 0) || boot)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", engineOn);
         _lastEngineOn = engineOn;
     }
 
-    if (_publishCounter % 301 == 0)
+    if (_publishCounter % 396 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/battery", _batteryDriver.GetVoltage());
     }
 
-    if (_publishCounter % 6000 == 0)
+    if (_publishCounter == 1500)
     {
         republishCommands();
         _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/mqttStatus", "OK"); 

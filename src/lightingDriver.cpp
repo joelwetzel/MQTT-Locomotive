@@ -88,8 +88,8 @@ void LightingDriver::ProcessStep()
             digitalWrite(REAR_PIN, 1);
             break;
         case HeadlightModes::Auto:
-            digitalWrite(FRONT_PIN, _physics.GetSpeed() > 0);
-            digitalWrite(REAR_PIN, _physics.GetSpeed() < 0);
+            digitalWrite(FRONT_PIN, _physics.GetReverser() > 0);
+            digitalWrite(REAR_PIN, _physics.GetReverser() < 0);
             break;
     }
 }

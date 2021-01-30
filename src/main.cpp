@@ -10,6 +10,7 @@
 #include "lightingDriver.h"
 #include "soundDriver.h"
 #include "batteryDriver.h"
+#include "smokeDriver.h"
 
 
 /*****************  START GLOBALS SECTION ***********************************/
@@ -21,6 +22,7 @@ SimpleTimer timer;
 BatteryDriver batteryDriver;
 Physics physics(batteryDriver);
 MotorDriver motorDriver;
+SmokeDriver smokeDriver;
 LightingDriver lightingDriver(physics, batteryDriver);
 SoundDriver soundDriver;
 MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundDriver, batteryDriver);
@@ -33,6 +35,7 @@ void processStep()
   batteryDriver.ProcessStep();
   physics.ProcessStep();
   motorDriver.SetMotorSpeed(physics.GetSpeed());
+  smokeDriver.SetSmokePercent(physics.GetSmokePercent());
   lightingDriver.ProcessStep();
   soundDriver.ProcessStep();
   mqttHandler.ProcessStep();
@@ -45,10 +48,9 @@ void setup()
 
   pinMode(D0, OUTPUT);
 
-  pinMode(ENA, OUTPUT);
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);  
-  
+
+  motorDriver.Setup();
+  smokeDriver.Setup();
   mqttHandler.Setup();
   lightingDriver.Setup();
   soundDriver.Setup();

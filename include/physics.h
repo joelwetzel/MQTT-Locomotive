@@ -13,9 +13,9 @@
 #define BRAKING_FACTOR                      0.0001
 #define ENGINE_POWER                        0.0000017
 
-#define SMOKE_OVERTHROTTLE_FACTOR           1.0
-#define SMOKE_ENGINE_WORK_FACTOR            5.0
-#define SMOKE_ACCELERATION_FACTOR           500.0
+#define SMOKE_OVERTHROTTLE_FACTOR           1.5
+#define SMOKE_ENGINE_WORK_FACTOR            7.0
+#define SMOKE_ACCELERATION_FACTOR           700.0
 
 class Physics
 {
@@ -37,7 +37,6 @@ class Physics
     void processReverserStep();
     void processSmokeStep();
     void clampSpeed();
-    void clampSmoke();
 
 public:
     Physics(BatteryDriver &batteryDriver);

@@ -8,9 +8,9 @@
 #define LIGHTINGDRIVER_H
 
 
-#define CAB_PIN D5
-#define FRONT_PIN D6
-#define REAR_PIN D7
+#define CAB_PIN D6
+#define FRONT_PIN D7
+#define REAR_PIN D8
 
 enum HeadlightModes
 {

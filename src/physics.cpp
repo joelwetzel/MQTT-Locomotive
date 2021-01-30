@@ -3,10 +3,10 @@
 Physics::Physics(BatteryDriver &batteryDriver)
     : _batteryDriver(batteryDriver)
 {
-    _engineOn = false;
+    _engineOn = true;
     _throttle = 0.0;
-    _brake = 100.0;
-    _reverserDirection = 0;
+    _brake = 0.0;
+    _reverserDirection = 1;
 
     _engineRpms = 0.0;
     _smokePercent = 0.0;
@@ -169,6 +169,19 @@ void Physics::processReverserStep()
 }
 
 
+void Physics::clampSpeed()
+{
+    if (_speed > 100.0)
+    {
+        _speed = 100.0;
+    }
+    else if (_speed < -100.0)
+    {
+        _speed = -100.0;
+    }
+}
+
+
 void Physics::processSmokeStep()
 {
     float overThrottleSmokePercent = 0.0;
@@ -188,32 +201,16 @@ void Physics::processSmokeStep()
     }
 
     // Make more smoke when the train is accelerating.
-    if (_engineOn && _speed > _previousSpeed)
-    {
-        speedSmokePercent = (_speed - _previousSpeed) * SMOKE_ACCELERATION_FACTOR;
-    }
+    // if (_engineOn && _speed > _previousSpeed)
+    // {
+    //     speedSmokePercent = (_speed - _previousSpeed) * SMOKE_ACCELERATION_FACTOR;
+    // }
 
     _smokePercent = overThrottleSmokePercent +
                     engineWorkSmokePercent +
                     speedSmokePercent;
-}
 
-
-void Physics::clampSpeed()
-{
-    if (_speed > 100.0)
-    {
-        _speed = 100.0;
-    }
-    else if (_speed < -100.0)
-    {
-        _speed = -100.0;
-    }
-}
-
-
-void Physics::clampSmoke()
-{
+    // Clamp
     if (_smokePercent > 100.0)
     {
         _smokePercent = 100.0;
@@ -224,6 +221,7 @@ void Physics::clampSmoke()
     }
 }
 
+
 void Physics::ProcessStep()
 {
     processEngineStep();
@@ -231,7 +229,6 @@ void Physics::ProcessStep()
     processReverserStep();
     clampSpeed();
     processSmokeStep();
-    clampSmoke();
     
     _previousSpeed = _speed;
 }

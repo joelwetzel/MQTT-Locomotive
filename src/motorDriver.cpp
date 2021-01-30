@@ -6,6 +6,15 @@ MotorDriver::MotorDriver()
 
 }
 
+
+void MotorDriver::Setup()
+{
+  pinMode(MOTORPOWER_PIN, OUTPUT);
+  pinMode(MOTORFORWARD_PIN, OUTPUT);
+  pinMode(MOTORBACKWARD_PIN, OUTPUT);  
+}
+
+
 // percent is from -100.0 to 100.0
 void MotorDriver::SetMotorSpeed(float percent)
 {
@@ -20,21 +29,21 @@ void MotorDriver::SetMotorSpeed(float percent)
   }
 
   if (cappedPercent < 0.05 && cappedPercent > -0.05) {
-    digitalWrite(IN1, LOW);
-    digitalWrite(IN2, LOW);
-    analogWrite(ENA, 0);
+    digitalWrite(MOTORFORWARD_PIN, LOW);
+    digitalWrite(MOTORBACKWARD_PIN, LOW);
+    analogWrite(MOTORPOWER_PIN, 0);
   }
   else {
     if (cappedPercent > 0.0)
     {
-      digitalWrite(IN1, HIGH);
-      digitalWrite(IN2, LOW);
+      digitalWrite(MOTORFORWARD_PIN, HIGH);
+      digitalWrite(MOTORBACKWARD_PIN, LOW);
     }
     else
     {
-      digitalWrite(IN1, LOW);
-      digitalWrite(IN2, HIGH);
+      digitalWrite(MOTORFORWARD_PIN, LOW);
+      digitalWrite(MOTORBACKWARD_PIN, HIGH);
     }
-    analogWrite(ENA, (MIN_SPEED_PWM + fabs(cappedPercent) / 100.0 * (MAX_SPEED_PWM - MIN_SPEED_PWM)));
+    analogWrite(MOTORPOWER_PIN, (MIN_SPEED_PWM + fabs(cappedPercent) / 100.0 * (MAX_SPEED_PWM - MIN_SPEED_PWM)));
   }
 }

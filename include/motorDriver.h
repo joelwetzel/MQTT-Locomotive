@@ -4,17 +4,25 @@
 #define MOTORDRIVER_H
 
 
-#define ENA D2
-#define IN1 D3
-#define IN2 D4
+#define MOTORPOWER_PIN D3
+#define MOTORFORWARD_PIN D4
+#define MOTORBACKWARD_PIN D5
 
+// Values for 16384Hz pwm
 #define MIN_SPEED_PWM             580.0
-#define MAX_SPEED_PWM             800.0
+#define MAX_SPEED_PWM             760.0
+
+// Values for 12000
+//#define MIN_SPEED_PWM             580.0
+//#define MAX_SPEED_PWM             760.0
+
 
 class MotorDriver
 {
 public:
     MotorDriver();
+
+    void Setup();
 
     void SetMotorSpeed(float percent);
 };
