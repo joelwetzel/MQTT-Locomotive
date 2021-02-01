@@ -1,10 +1,9 @@
 #include "mqttHandler.h"
 
 
-MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver, BatteryDriver &batteryDriver)
-    : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver), _soundDriver(soundDriver), _batteryDriver(batteryDriver)
+MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver)
+    : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver), _soundDriver(soundDriver), _batteryDriver(batteryDriver), _smokeDriver(smokeDriver)
 {
-    _lastMasterSwitch = false;
     _lastEngineOn = false;
     _lastEngineRpms = -1;
     _lastReverser = 0;
@@ -86,6 +85,11 @@ void MqttHandler::Setup()
             _physics.SetEngineOn(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", intPayload);
         }
+        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke")
+        {
+            _smokeDriver.SetSmokeDisabled(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/disablesmoke", intPayload);
+        }
     });
 
 //    ArduinoOTA.setHostname(USER_DEVICE_NETWORK_ID);
@@ -151,6 +155,7 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke");
       } 
       else 
       {
@@ -182,6 +187,7 @@ void MqttHandler::republishCommands()
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn", _soundDriver.GetHorn());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch", _batteryDriver.GetMasterSwitch());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon", _physics.GetEngineOn());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke", _smokeDriver.GetSmokeDisabled());
 }
 
 
@@ -248,10 +254,9 @@ void MqttHandler::ProcessStep()
         _lastReverser = reverser;
     }
 
-    if ((masterSwitch != _lastMasterSwitch) || boot)
+    if (boot)
     {
-        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", masterSwitch);
-        _lastMasterSwitch = masterSwitch;
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", _batteryDriver.GetMasterSwitch());
     }
 
     if ((engineOn != _lastEngineOn || _publishCounter % 301 == 0) || boot)
@@ -267,7 +272,6 @@ void MqttHandler::ProcessStep()
 
     if (_publishCounter == 1500)
     {
-        republishCommands();
         _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/mqttStatus", "OK"); 
         _publishCounter = 0;
     }

@@ -7,6 +7,7 @@
 #include "lightingDriver.h"
 #include "soundDriver.h"
 #include "batteryDriver.h"
+#include "smokeDriver.h"
 #include "config.h"
 
 #ifndef MQTTHANDLER_H
@@ -21,6 +22,7 @@ class MqttHandler
     LightingDriver &_lightingDriver;
     SoundDriver &_soundDriver;
     BatteryDriver &_batteryDriver;
+    SmokeDriver &_smokeDriver;
 
     const char* ssid = WIFI_SSID; 
     const char* password = WIFI_PASSWORD;
@@ -30,7 +32,6 @@ class MqttHandler
 
     bool boot = true;
 
-    bool _lastMasterSwitch;
     bool _lastEngineOn;
     float _lastEngineRpms;
     int _lastReverser;
@@ -48,7 +49,7 @@ class MqttHandler
     void publish(const char *topic, int value);
 
 public:
-    MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver, BatteryDriver &batteryDriver);
+    MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver);
 
     void Setup();
     void Loop();

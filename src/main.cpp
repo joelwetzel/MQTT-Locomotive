@@ -25,7 +25,7 @@ MotorDriver motorDriver;
 SmokeDriver smokeDriver;
 LightingDriver lightingDriver(physics, batteryDriver);
 SoundDriver soundDriver;
-MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundDriver, batteryDriver);
+MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundDriver, batteryDriver, smokeDriver);
 
 /*****************  END GLOBALS SECTION ***********************************/
 
