@@ -14,6 +14,8 @@ void SoundDriver::SetBell(bool on)
 {
     _bell = on;
     _bellCount = 0;
+
+    // TODO - depend on master switch
 }
 
 
@@ -27,6 +29,8 @@ void SoundDriver::SetHorn(bool on)
 {
     _horn = on;
     _hornCount = 0;
+
+    // TODO - depend on master switch
 }
 
 

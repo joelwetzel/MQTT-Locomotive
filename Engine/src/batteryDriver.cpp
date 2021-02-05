@@ -5,7 +5,7 @@
 BatteryDriver::BatteryDriver()
 {
     _voltage = 0.0;
-    _masterSwitch = true;
+    _masterSwitch = false;
 }
 
 void BatteryDriver::Setup()

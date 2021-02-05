@@ -3,10 +3,10 @@
 Physics::Physics(BatteryDriver &batteryDriver)
     : _batteryDriver(batteryDriver)
 {
-    _engineOn = true;
+    _engineOn = false;
     _throttle = 0.0;
     _brake = 0.0;
-    _reverserDirection = 1;
+    _reverserDirection = 0;
 
     _engineRpms = 0.0;
     _smokePercent = 0.0;

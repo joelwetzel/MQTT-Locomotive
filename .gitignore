@@ -3,4 +3,8 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-include/config.h
+config.h
+Engine/.vscode/c_cpp_properties.json
+Engine/.vscode/launch.json
+Audio/.vscode/launch.json
+Audio/.vscode/c_cpp_properties.json

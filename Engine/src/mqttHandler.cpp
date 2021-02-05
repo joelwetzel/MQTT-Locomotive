@@ -58,22 +58,22 @@ void MqttHandler::Setup()
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights")
         {
             _lightingDriver.SetCabLights(intPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/cablights", intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/cablights", _lightingDriver.GetCabLights());
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights")
         {
             _lightingDriver.SetHeadlights(intPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/headlights", intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/headlights", _lightingDriver.GetHeadlights());
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell")
         {
             _soundDriver.SetBell(intPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", _soundDriver.GetBell());
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn")
         {
             _soundDriver.SetHorn(intPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", _soundDriver.GetHorn());
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch")
         {
@@ -83,7 +83,7 @@ void MqttHandler::Setup()
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon")
         {
             _physics.SetEngineOn(intPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", _physics.GetEngineOn());
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke")
         {
@@ -135,14 +135,14 @@ void MqttHandler::reconnect()
 
         if (boot)
         {
-            _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/mqttStatus", "Rebooted");
+            _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/engineStatus", "Rebooted");
             republishCommands();
             ProcessStep();
             boot = false;
         }
         else
         {
-          _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/mqttStatus", "Reconnected"); 
+          _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/engineStatus", "Reconnected"); 
         }
 
         // ... and resubscribe
@@ -272,7 +272,7 @@ void MqttHandler::ProcessStep()
 
     if (_publishCounter == 1500)
     {
-        _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/mqttStatus", "OK"); 
+        _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/engineStatus", "OK"); 
         _publishCounter = 0;
     }
 

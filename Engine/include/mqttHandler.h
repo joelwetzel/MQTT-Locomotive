@@ -1,6 +1,6 @@
 #include <PubSubClient.h>
-#include <ESP8266WiFi.h>    // if you get an error here you need to install the ESP8266 board manager 
-#include <ESP8266mDNS.h>    // if you get an error here you need to install the ESP8266 board manager 
+#include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
 //#include <ArduinoOTA.h>     // https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
 
 #include "physics.h"

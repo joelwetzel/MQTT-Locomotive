@@ -10,7 +10,12 @@ LightingDriver::LightingDriver(Physics &physics, BatteryDriver &batteryDriver)
 
 void LightingDriver::SetCabLights(bool on)
 {
-    _cabLightsOn = on;  
+    _cabLightsOn = on;
+
+    if (_batteryDriver.GetMasterSwitch())
+    {
+        _cabLightsOn = false;
+    }
 }
 
 
@@ -39,6 +44,11 @@ void LightingDriver::SetHeadlights(int mode)
         case 4:
             _headlightMode = HeadlightModes::Auto;
             break;
+    }
+
+    if (_batteryDriver.GetMasterSwitch())
+    {
+        _headlightMode = HeadlightModes::Off;
     }
 }
 

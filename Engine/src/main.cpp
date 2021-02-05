@@ -60,6 +60,8 @@ void setup()
   
   timer.setInterval(PHYSICS_DELTAT, processStep);   
 
+  // Set the PWM (which goes out to the motor controller) to a high frequency.
+  // If not done, you'll get a 1KHz tone from the motor.
   analogWriteFreq(16384);
 }
 
