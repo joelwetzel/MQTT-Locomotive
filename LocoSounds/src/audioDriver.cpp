@@ -61,12 +61,12 @@ void AudioDriver::Setup()
 
   // Use channel 1 for the periodic horn sound.
   stubs[HORN_CHANNEL] = mixer->NewInput();
-  stubs[HORN_CHANNEL]->SetGain(0.8);
+  stubs[HORN_CHANNEL]->SetGain(1.0);        // 0.8 when running on desktop
   wavs[HORN_CHANNEL] = new AudioGeneratorWAV();
 
   // Use channel 2 for the bell sound
   stubs[BELL_CHANNEL] = mixer->NewInput();
-  stubs[BELL_CHANNEL]->SetGain(0.6);
+  stubs[BELL_CHANNEL]->SetGain(0.9);        // 0.6 when running on desktop
   wavs[BELL_CHANNEL] = new AudioGeneratorWAV();
 }
 
@@ -81,7 +81,7 @@ void AudioDriver::Loop()
     }
 
     // Set engine volume based on rpms
-    float engine_gain = ((engineRpms / 100.0) * 0.6) + 0.3;
+    float engine_gain = ((engineRpms / 100.0) * 0.6) + 0.5;
     if (engine_gain > 1.0) {
         engine_gain = 1.0;
     }
@@ -100,10 +100,10 @@ void AudioDriver::Loop()
             if (engineOn || engineRpms > 0.1)
             {
                 // Set the engine wav file based on rpms
-                if (engineRpms < 10) {
+                if (engineRpms < 5) {
                     files[ENGINE_CHANNEL] = new AudioFileSourceLittleFS(ENGINE_WAV_LOW);
                 }
-                else if (engineRpms < 30) {
+                else if (engineRpms < 20) {
                     files[ENGINE_CHANNEL] = new AudioFileSourceLittleFS(ENGINE_WAV_MID);
                 }
                 else {
