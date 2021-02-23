@@ -87,7 +87,7 @@ void MqttHandler::reconnect()
       {
         Serial.println("connected");
 
-        digitalWrite(LED_BUILTIN, 0);
+        digitalWrite(MQTT_CONNECTED_PIN, 0);
         
         if (_boot)
         {
@@ -108,7 +108,7 @@ void MqttHandler::reconnect()
       } 
       else 
       {
-        digitalWrite(LED_BUILTIN, 1);
+        digitalWrite(MQTT_CONNECTED_PIN, 1);
 
         Serial.print("failed, rc=");
         Serial.print(_mqttClient.state());
@@ -131,7 +131,7 @@ void MqttHandler::Loop()
 {
     if (!_mqttClient.connected()) 
     {
-        digitalWrite(LED_BUILTIN, 1);
+        digitalWrite(MQTT_CONNECTED_PIN, 1);
         reconnect();
     }
 

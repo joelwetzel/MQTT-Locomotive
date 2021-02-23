@@ -28,7 +28,12 @@ void setup() {
   delay(1000);
   LittleFS.begin();
 
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(MQTT_CONNECTED_PIN, OUTPUT);
+  
+  // Flash the LED for just a moment before trying to connect to MQTT.  The LED will come back on permanently when connected.
+  pinMode(MQTT_CONNECTED_PIN, 0);
+  delay(500);
+  pinMode(MQTT_CONNECTED_PIN, 1);
 
   mqttHandler.Setup();
   audioDriver.Setup();
