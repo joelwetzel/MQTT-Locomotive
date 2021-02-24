@@ -5,7 +5,7 @@
 
 #include "physics.h"
 #include "lightingDriver.h"
-#include "soundDriver.h"
+#include "soundController.h"
 #include "batteryDriver.h"
 #include "smokeDriver.h"
 #include "config.h"
@@ -20,7 +20,7 @@ class MqttHandler
 
     Physics &_physics;
     LightingDriver &_lightingDriver;
-    SoundDriver &_soundDriver;
+    SoundController &_soundController;
     BatteryDriver &_batteryDriver;
     SmokeDriver &_smokeDriver;
 
@@ -49,7 +49,7 @@ class MqttHandler
     void publish(const char *topic, int value);
 
 public:
-    MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver);
+    MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver);
 
     void Setup();
     void Loop();

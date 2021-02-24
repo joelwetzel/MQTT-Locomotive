@@ -8,7 +8,7 @@
 #include "motorDriver.h"
 #include "mqttHandler.h"
 #include "lightingDriver.h"
-#include "soundDriver.h"
+#include "soundController.h"
 #include "batteryDriver.h"
 #include "smokeDriver.h"
 
@@ -24,8 +24,8 @@ Physics physics(batteryDriver);
 MotorDriver motorDriver;
 SmokeDriver smokeDriver;
 LightingDriver lightingDriver(physics, batteryDriver);
-SoundDriver soundDriver;
-MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundDriver, batteryDriver, smokeDriver);
+SoundController soundController;
+MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundController, batteryDriver, smokeDriver);
 
 /*****************  END GLOBALS SECTION ***********************************/
 
@@ -37,7 +37,7 @@ void processStep()
   motorDriver.SetMotorSpeed(physics.GetSpeed());
   smokeDriver.SetSmokePercent(physics.GetSmokePercent());
   lightingDriver.ProcessStep();
-  soundDriver.ProcessStep();
+  soundController.ProcessStep();
   mqttHandler.ProcessStep();
 }
 
@@ -53,7 +53,7 @@ void setup()
   smokeDriver.Setup();
   mqttHandler.Setup();
   lightingDriver.Setup();
-  soundDriver.Setup();
+  soundController.Setup();
   batteryDriver.Setup();
 
   delay(10);

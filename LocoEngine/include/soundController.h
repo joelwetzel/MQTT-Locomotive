@@ -2,20 +2,19 @@
 
 #include "config.h"
 
-#ifndef SOUNDDRIVER_H
-#define SOUNDDRIVER_H
+#ifndef SOUNDCONTROLLER_H
+#define SOUNDCONTROLLER_H
 
-class SoundDriver
+
+class SoundController
 {
     bool _bell;
     bool _horn;
     int _bellCount;
     int _hornCount;
-
-
     
 public:
-    SoundDriver();
+    SoundController();
 
     void SetBell(bool on);
     bool GetBell();

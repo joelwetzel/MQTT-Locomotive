@@ -8,9 +8,16 @@
 #define LIGHTINGDRIVER_H
 
 
-#define CAB_PIN D6
-#define FRONT_PIN D7
-#define REAR_PIN D8
+#ifdef ARDUINO_ESP8266_NODEMCU
+    #define CAB_PIN D6
+    #define FRONT_PIN D7
+    #define REAR_PIN D8
+#elif ARDUINO_ESP8266_WEMOS_D1MINI
+    #define CAB_PIN D6
+    #define FRONT_PIN D7
+    #define REAR_PIN D8
+#endif
+
 
 enum HeadlightModes
 {

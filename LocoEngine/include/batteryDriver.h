@@ -5,7 +5,13 @@
 #ifndef BATTERYDRIVER_H
 #define BATTERYDRIVER_H
 
-#define TRACK_VOLTAGE_PIN   A0
+
+#ifdef ARDUINO_ESP8266_NODEMCU
+    #define TRACK_VOLTAGE_PIN   A0
+#elif ARDUINO_ESP8266_WEMOS_D1MINI
+    #define TRACK_VOLTAGE_PIN   A0
+#endif
+
 
 class BatteryDriver
 {

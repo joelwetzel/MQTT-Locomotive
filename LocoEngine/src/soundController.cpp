@@ -1,7 +1,7 @@
-#include "soundDriver.h"
+#include "soundController.h"
 
 
-SoundDriver::SoundDriver()
+SoundController::SoundController()
 {
     _bell = false;
     _horn = false;
@@ -10,7 +10,7 @@ SoundDriver::SoundDriver()
 }
 
 
-void SoundDriver::SetBell(bool on)
+void SoundController::SetBell(bool on)
 {
     _bell = on;
     _bellCount = 0;
@@ -19,13 +19,13 @@ void SoundDriver::SetBell(bool on)
 }
 
 
-bool SoundDriver::GetBell()
+bool SoundController::GetBell()
 {
     return _bell;
 }
 
 
-void SoundDriver::SetHorn(bool on)
+void SoundController::SetHorn(bool on)
 {
     _horn = on;
     _hornCount = 0;
@@ -34,19 +34,18 @@ void SoundDriver::SetHorn(bool on)
 }
 
 
-bool SoundDriver::GetHorn()
+bool SoundController::GetHorn()
 {
     return _horn;
 }
 
 
-void SoundDriver::Setup()
+void SoundController::Setup()
 {
-    // TODO - setup pins
 }
 
 
-void SoundDriver::ProcessStep()
+void SoundController::ProcessStep()
 {
     // Turn off the bell after 30 seconds.
     if (_bell)

@@ -1,8 +1,8 @@
 #include "mqttHandler.h"
 
 
-MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundDriver &soundDriver, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver)
-    : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver), _soundDriver(soundDriver), _batteryDriver(batteryDriver), _smokeDriver(smokeDriver)
+MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver)
+    : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver), _soundController(soundController), _batteryDriver(batteryDriver), _smokeDriver(smokeDriver)
 {
     _lastEngineOn = false;
     _lastEngineRpms = -1;
@@ -67,13 +67,13 @@ void MqttHandler::Setup()
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell")
         {
-            _soundDriver.SetBell(intPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", _soundDriver.GetBell());
+            _soundController.SetBell(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", _soundController.GetBell());
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn")
         {
-            _soundDriver.SetHorn(intPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", _soundDriver.GetHorn());
+            _soundController.SetHorn(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", _soundController.GetHorn());
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch")
         {
@@ -183,8 +183,8 @@ void MqttHandler::republishCommands()
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser", _physics.GetReverser());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights", _lightingDriver.GetCabLights());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights", _lightingDriver.GetHeadlights());
-    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell", _soundDriver.GetBell());
-    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn", _soundDriver.GetHorn());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell", _soundController.GetBell());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn", _soundController.GetHorn());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch", _batteryDriver.GetMasterSwitch());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon", _physics.GetEngineOn());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke", _smokeDriver.GetSmokeDisabled());
@@ -215,8 +215,8 @@ void MqttHandler::ProcessStep()
     int reverser = _physics.GetReverser();
     float smokePercent = _physics.GetSmokePercent();
     float speed = _physics.GetSpeed();
-    bool bell = _soundDriver.GetBell();
-    bool horn = _soundDriver.GetHorn();
+    bool bell = _soundController.GetBell();
+    bool horn = _soundController.GetHorn();
 
     if ((fabs(engineRpms - _lastEngineRpms) > 0.05 && _publishCounter % 47 == 0) || _publishCounter % 500 == 0)
     {

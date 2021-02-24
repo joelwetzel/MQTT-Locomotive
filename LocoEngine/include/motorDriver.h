@@ -4,17 +4,19 @@
 #define MOTORDRIVER_H
 
 
-#define MOTORPOWER_PIN D2
-#define MOTORFORWARD_PIN D4
-#define MOTORBACKWARD_PIN D5
+#ifdef ARDUINO_ESP8266_NODEMCU
+    #define MOTORPOWER_PIN D2
+    #define MOTORFORWARD_PIN D4
+    #define MOTORBACKWARD_PIN D5
+#elif ARDUINO_ESP8266_WEMOS_D1MINI
+    #define MOTORPOWER_PIN D2
+    #define MOTORFORWARD_PIN D4
+    #define MOTORBACKWARD_PIN D5
+#endif
 
 // Values for 16384Hz pwm
 #define MIN_SPEED_PWM             580.0
 #define MAX_SPEED_PWM             760.0
-
-// Values for 12000
-//#define MIN_SPEED_PWM             580.0
-//#define MAX_SPEED_PWM             760.0
 
 
 class MotorDriver
