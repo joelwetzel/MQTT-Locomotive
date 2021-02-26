@@ -133,6 +133,8 @@ void MqttHandler::reconnect()
       {
         Serial.println("connected");
 
+        digitalWrite(MQTT_CONNECTED_PIN, 0);
+
         if (boot)
         {
             _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/engineStatus", "Rebooted");
@@ -159,6 +161,7 @@ void MqttHandler::reconnect()
       } 
       else 
       {
+        digitalWrite(MQTT_CONNECTED_PIN, 1);
         Serial.print("failed, rc=");
         Serial.print(_mqttClient.state());
         Serial.println(" try again in 5 seconds");
@@ -195,6 +198,7 @@ void MqttHandler::Loop()
 {
     if (!_mqttClient.connected()) 
     {
+        digitalWrite(MQTT_CONNECTED_PIN, 1);
         reconnect();
     }
 

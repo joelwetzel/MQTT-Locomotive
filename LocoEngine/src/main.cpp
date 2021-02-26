@@ -46,8 +46,12 @@ void setup()
 {
   Serial.begin(9600);
 
-  pinMode(D0, OUTPUT);
+  pinMode(MQTT_CONNECTED_PIN, OUTPUT);
 
+  // Flash the LED for just a moment before trying to connect to MQTT.  The LED will come back on permanently when connected.
+  pinMode(MQTT_CONNECTED_PIN, 0);
+  delay(500);
+  pinMode(MQTT_CONNECTED_PIN, 1);
 
   motorDriver.Setup();
   smokeDriver.Setup();
