@@ -9,9 +9,9 @@
     #define MOTORFORWARD_PIN D4
     #define MOTORBACKWARD_PIN D5
 #elif ARDUINO_ESP8266_WEMOS_D1MINI
-    #define MOTORPOWER_PIN D2
-    #define MOTORFORWARD_PIN D4
-    #define MOTORBACKWARD_PIN D5
+    #define MOTORPOWER_PIN D4
+    #define MOTORFORWARD_PIN D2
+    #define MOTORBACKWARD_PIN D1
 #endif
 
 // Values for 16384Hz pwm
