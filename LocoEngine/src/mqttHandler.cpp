@@ -1,8 +1,8 @@
 #include "mqttHandler.h"
 
 
-MqttHandler::MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver)
-    : _mqttClient(mqttClient), _physics(physics), _lightingDriver(lightingDriver), _soundController(soundController), _batteryDriver(batteryDriver), _smokeDriver(smokeDriver)
+MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel &controlModel, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver)
+    : _mqttClient(mqttClient), _controlModel(controlModel), _lightingDriver(lightingDriver), _soundController(soundController), _batteryDriver(batteryDriver), _smokeDriver(smokeDriver)
 {
     _lastEngineOn = false;
     _lastEngineRpms = -1;
@@ -42,17 +42,17 @@ void MqttHandler::Setup()
 
         if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/throttle")
         {
-            _physics.SetThrottle(floatPayload);
+            _controlModel.SetThrottle(floatPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/throttle", floatPayload);
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/brake")
         {
-            _physics.SetBrake(floatPayload);
+            _controlModel.SetBrake(floatPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/brake", floatPayload);
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser")
         {
-            _physics.SetReverser(intPayload);
+            _controlModel.SetReverser(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/reverser", intPayload);
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights")
@@ -82,8 +82,8 @@ void MqttHandler::Setup()
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon")
         {
-            _physics.SetEngineOn(intPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", _physics.GetEngineOn());
+            _controlModel.SetEngineOn(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", _controlModel.GetEngineOn());
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke")
         {
@@ -181,15 +181,15 @@ void MqttHandler::reconnect()
 
 void MqttHandler::republishCommands()
 {
-    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/throttle", _physics.GetThrottle());
-    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/brake", _physics.GetBrake());
-    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser", _physics.GetReverser());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/throttle", _controlModel.GetThrottle());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/brake", _controlModel.GetBrake());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser", _controlModel.GetReverser());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights", _lightingDriver.GetCabLights());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights", _lightingDriver.GetHeadlights());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell", _soundController.GetBell());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn", _soundController.GetHorn());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch", _batteryDriver.GetMasterSwitch());
-    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon", _physics.GetEngineOn());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon", _controlModel.GetEngineOn());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke", _smokeDriver.GetSmokeDisabled());
 }
 
@@ -214,11 +214,11 @@ void MqttHandler::ProcessStep()
     //   - Or every 60 seconds
 
     bool masterSwitch = _batteryDriver.GetMasterSwitch();
-    bool engineOn = _physics.GetEngineOn();
-    float engineRpms = _physics.GetEngineRpms();
-    int reverser = _physics.GetReverser();
-    float smokePercent = _physics.GetSmokePercent();
-    float speed = _physics.GetSpeed();
+    bool engineOn = _controlModel.GetEngineOn();
+    float engineRpms = _controlModel.GetEngineRpms();
+    int reverser = _controlModel.GetReverser();
+    float smokePercent = _controlModel.GetSmokePercent();
+    float speed = _controlModel.GetSpeed();
     bool bell = _soundController.GetBell();
     bool horn = _soundController.GetHorn();
 

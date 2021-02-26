@@ -3,7 +3,7 @@
 #include <ESP8266mDNS.h>
 //#include <ArduinoOTA.h>     // https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
 
-#include "physics.h"
+#include "iControlModel.h"
 #include "lightingDriver.h"
 #include "soundController.h"
 #include "batteryDriver.h"
@@ -18,7 +18,7 @@ class MqttHandler
 {
     PubSubClient &_mqttClient;
 
-    Physics &_physics;
+    IControlModel &_controlModel;
     LightingDriver &_lightingDriver;
     SoundController &_soundController;
     BatteryDriver &_batteryDriver;
@@ -49,7 +49,7 @@ class MqttHandler
     void publish(const char *topic, int value);
 
 public:
-    MqttHandler(PubSubClient &mqttClient, Physics &physics, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver);
+    MqttHandler(PubSubClient &mqttClient, IControlModel &controlModel, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver);
 
     void Setup();
     void Loop();

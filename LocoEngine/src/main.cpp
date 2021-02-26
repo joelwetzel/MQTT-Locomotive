@@ -4,7 +4,11 @@
 #include <math.h>
 
 #include "config.h"
-#include "physics.h"
+
+#include "iControlModel.h"
+#include "simulatorControlModel.h"
+#include "toyControlModel.h"
+
 #include "motorDriver.h"
 #include "mqttHandler.h"
 #include "lightingDriver.h"
@@ -20,12 +24,18 @@ PubSubClient mqttClient(espClient);
 SimpleTimer timer;
 
 BatteryDriver batteryDriver;
-Physics physics(batteryDriver);
+
+#ifdef SIMULATOR_CONTROL_MODEL
+SimulatorControlModel controlModel(batteryDriver);
+#elif defined TOY_CONTROL_MODEL
+ToyControlModel controlModel(batteryDriver);
+#endif
+
 MotorDriver motorDriver;
 SmokeDriver smokeDriver;
-LightingDriver lightingDriver(physics, batteryDriver);
+LightingDriver lightingDriver(controlModel, batteryDriver);
 SoundController soundController;
-MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundController, batteryDriver, smokeDriver);
+MqttHandler mqttHandler(mqttClient, controlModel, lightingDriver, soundController, batteryDriver, smokeDriver);
 
 /*****************  END GLOBALS SECTION ***********************************/
 
@@ -33,9 +43,9 @@ MqttHandler mqttHandler(mqttClient, physics, lightingDriver, soundController, ba
 void processStep()
 {
   batteryDriver.ProcessStep();
-  physics.ProcessStep();
-  motorDriver.SetMotorSpeed(physics.GetSpeed());
-  smokeDriver.SetSmokePercent(physics.GetSmokePercent());
+  controlModel.ProcessStep();
+  motorDriver.SetMotorSpeed(controlModel.GetSpeed());
+  smokeDriver.SetSmokePercent(controlModel.GetSmokePercent());
   lightingDriver.ProcessStep();
   soundController.ProcessStep();
   mqttHandler.ProcessStep();

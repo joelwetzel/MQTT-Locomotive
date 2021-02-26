@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 #include "config.h"
-#include "physics.h"
+#include "iControlModel.h"
 #include "batteryDriver.h"
 
 #ifndef LIGHTINGDRIVER_H
@@ -31,7 +31,7 @@ enum HeadlightModes
 
 class LightingDriver
 {
-    Physics &_physics;
+    IControlModel &_controlModel;
     BatteryDriver &_batteryDriver;
 
 
@@ -39,7 +39,7 @@ class LightingDriver
     HeadlightModes _headlightMode;
 
 public:
-    LightingDriver(Physics &physics, BatteryDriver &batteryDriver);
+    LightingDriver(IControlModel &controlModel, BatteryDriver &batteryDriver);
 
     void SetCabLights(bool on);
     bool GetCabLights();

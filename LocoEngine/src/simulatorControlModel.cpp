@@ -1,6 +1,6 @@
-#include "physics.h"
+#include "simulatorControlModel.h"
 
-Physics::Physics(BatteryDriver &batteryDriver)
+SimulatorControlModel::SimulatorControlModel(BatteryDriver &batteryDriver)
     : _batteryDriver(batteryDriver)
 {
     _engineOn = false;
@@ -16,24 +16,24 @@ Physics::Physics(BatteryDriver &batteryDriver)
 }
 
 
-float Physics::GetSpeed()
+float SimulatorControlModel::GetSpeed()
 {
     return _speed;
 }
 
-float Physics::GetEngineRpms()
+float SimulatorControlModel::GetEngineRpms()
 {
     return _engineRpms;
 }
 
-float Physics::GetSmokePercent()
+float SimulatorControlModel::GetSmokePercent()
 {
     return _smokePercent;
 }
 
 
 
-void Physics::SetEngineOn(bool on)
+void SimulatorControlModel::SetEngineOn(bool on)
 {
     if (_batteryDriver.GetMasterSwitch())
     {
@@ -41,44 +41,44 @@ void Physics::SetEngineOn(bool on)
     }
 }
 
-bool Physics::GetEngineOn()
+bool SimulatorControlModel::GetEngineOn()
 {
     return _engineOn;
 }
 
 
-void Physics::SetThrottle(float throttle)
+void SimulatorControlModel::SetThrottle(float throttle)
 {
     _throttle = throttle;
 }
 
-float Physics::GetThrottle()
+float SimulatorControlModel::GetThrottle()
 {
     return _throttle;
 }
 
-void Physics::SetBrake(float brake)
+void SimulatorControlModel::SetBrake(float brake)
 {
     _brake = brake;
 }
 
-float Physics::GetBrake()
+float SimulatorControlModel::GetBrake()
 {
     return _brake;
 }
 
-void Physics::SetReverser(int direction)
+void SimulatorControlModel::SetReverser(int direction)
 {
     _reverserDirection = direction;
 }
 
-int Physics::GetReverser()
+int SimulatorControlModel::GetReverser()
 {
     return _reverserDirection;
 }
 
 
-void Physics::processEngineStep()
+void SimulatorControlModel::processEngineStep()
 {
     // Master switch can kill the engine
     if (_batteryDriver.GetMasterSwitch() == false)
@@ -117,7 +117,7 @@ void Physics::processEngineStep()
 }
 
 
-void Physics::processResistanceStep()
+void SimulatorControlModel::processResistanceStep()
 {
     float resistance = 0.0;
 
@@ -155,7 +155,7 @@ void Physics::processResistanceStep()
 }
 
 
-void Physics::processReverserStep()
+void SimulatorControlModel::processReverserStep()
 {
     // Apply engine power through reverser
     if (_batteryDriver.GetMasterSwitch() == true)
@@ -169,7 +169,7 @@ void Physics::processReverserStep()
 }
 
 
-void Physics::clampSpeed()
+void SimulatorControlModel::clampSpeed()
 {
     if (_speed > 100.0)
     {
@@ -182,7 +182,7 @@ void Physics::clampSpeed()
 }
 
 
-void Physics::processSmokeStep()
+void SimulatorControlModel::processSmokeStep()
 {
     float overThrottleSmokePercent = 0.0;
     float engineWorkSmokePercent = 0.0;
@@ -222,7 +222,7 @@ void Physics::processSmokeStep()
 }
 
 
-void Physics::ProcessStep()
+void SimulatorControlModel::ProcessStep()
 {
     processEngineStep();
     processResistanceStep();

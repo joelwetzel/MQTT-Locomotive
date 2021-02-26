@@ -1,10 +1,12 @@
+#include "iControlModel.h"
+
 #include <math.h>
 #include "config.h"
 
 #include "batteryDriver.h"
 
-#ifndef PHYSICS_H
-#define PHYSICS_H
+#ifndef SIMULATORCONTROLMODEL_H
+#define SIMULATORCONTROLMODEL_H
 
 
 #define ENGINE_SPINUP                       0.01
@@ -17,7 +19,7 @@
 #define SMOKE_ENGINE_WORK_FACTOR            7.0
 #define SMOKE_ACCELERATION_FACTOR           700.0
 
-class Physics
+class SimulatorControlModel : public IControlModel
 {
     BatteryDriver &_batteryDriver;
 
@@ -39,7 +41,8 @@ class Physics
     void clampSpeed();
 
 public:
-    Physics(BatteryDriver &batteryDriver);
+    SimulatorControlModel(BatteryDriver &batteryDriver);
+    ~SimulatorControlModel() { }
 
     float GetSpeed();
     float GetEngineRpms();

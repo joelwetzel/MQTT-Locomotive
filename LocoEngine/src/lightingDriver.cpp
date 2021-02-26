@@ -1,7 +1,7 @@
 #include "lightingDriver.h"
 
-LightingDriver::LightingDriver(Physics &physics, BatteryDriver &batteryDriver)
-    : _physics(physics), _batteryDriver(batteryDriver)
+LightingDriver::LightingDriver(IControlModel &controlModel, BatteryDriver &batteryDriver)
+    : _controlModel(controlModel), _batteryDriver(batteryDriver)
 {
     _headlightMode = HeadlightModes::Off;
     _cabLightsOn = false;
@@ -98,8 +98,8 @@ void LightingDriver::ProcessStep()
             digitalWrite(REAR_PIN, 1);
             break;
         case HeadlightModes::Auto:
-            digitalWrite(FRONT_PIN, _physics.GetReverser() > 0);
-            digitalWrite(REAR_PIN, _physics.GetReverser() < 0);
+            digitalWrite(FRONT_PIN, _controlModel.GetReverser() > 0);
+            digitalWrite(REAR_PIN, _controlModel.GetReverser() < 0);
             break;
     }
 }

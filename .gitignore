@@ -3,10 +3,10 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-config.h
 LocoEngine/.vscode/c_cpp_properties.json
 LocoEngine/.vscode/launch.json
 LocoSounds/.vscode/launch.json
 LocoSounds/.vscode/c_cpp_properties.json
 LocoSounds/.vscode
 LocoEngine/.vscode/settings.json
+wifi.h
