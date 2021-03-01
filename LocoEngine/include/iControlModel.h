@@ -9,6 +9,7 @@ public:
 
     virtual float GetSpeed() = 0;
     virtual float GetEngineRpms() = 0;
+    virtual float GetEnginePercent() = 0;
     virtual float GetSmokePercent() = 0;
 
     virtual void SetEngineOn(bool on) = 0;

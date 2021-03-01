@@ -20,4 +20,11 @@
 
 
 
+
+// RS-3 specific figures
+#define ENGINE_RPM_IDLE         315
+#define ENGINE_RPM_MAX          1000
+
+
+
 #endif

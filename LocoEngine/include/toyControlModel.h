@@ -16,6 +16,7 @@ class ToyControlModel : public IControlModel
     float _throttle;
     int _reverserDirection;
 
+    float _enginePercent;
     float _engineRpms;
     float _speed;
     float _smokePercent;
@@ -28,6 +29,7 @@ public:
 
     float GetSpeed();
     float GetEngineRpms();
+    float GetEnginePercent();
     float GetSmokePercent();
 
     void SetEngineOn(bool on);

@@ -37,10 +37,6 @@ void MqttHandler::Setup()
         {
             _audioDriver.SetHorn(intPayload);
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon")
-        {
-            _audioDriver.SetEngineOn(intPayload);
-        }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms")
         {
             _audioDriver.setEngineRpms(floatPayload);
@@ -104,7 +100,6 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms");
-        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon");
       } 
       else 
       {

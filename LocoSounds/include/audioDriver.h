@@ -24,7 +24,6 @@
 class AudioDriver
 {
     float engineRpms;
-    bool engineOn;
 
     bool bellOn;
     bool hornOn;
@@ -43,7 +42,6 @@ public:
 
     void SetBell(bool on);
     void SetHorn(bool on);
-    void SetEngineOn(bool on);
     void setEngineRpms(float rpms);
 };
 

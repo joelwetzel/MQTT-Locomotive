@@ -15,4 +15,12 @@
     #define MQTT_CONNECTED_PIN        2
 #endif
 
+
+// RS-3 specific figures
+#define ENGINE_RPM_IDLE         315
+#define ENGINE_RPM_1            500
+#define ENGINE_RPM_2            700
+#define ENGINE_RPM_MAX          1000
+
+
 #endif

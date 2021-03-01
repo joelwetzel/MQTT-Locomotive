@@ -8,6 +8,7 @@ SimulatorControlModel::SimulatorControlModel(BatteryDriver &batteryDriver)
     _brake = 0.0;
     _reverserDirection = 0;
 
+    _enginePercent = 0.0;
     _engineRpms = 0.0;
     _smokePercent = 0.0;
 
@@ -19,6 +20,11 @@ SimulatorControlModel::SimulatorControlModel(BatteryDriver &batteryDriver)
 float SimulatorControlModel::GetSpeed()
 {
     return _speed;
+}
+
+float SimulatorControlModel::GetEnginePercent()
+{
+    return _enginePercent;
 }
 
 float SimulatorControlModel::GetEngineRpms()
@@ -35,10 +41,7 @@ float SimulatorControlModel::GetSmokePercent()
 
 void SimulatorControlModel::SetEngineOn(bool on)
 {
-    if (_batteryDriver.GetMasterSwitch())
-    {
-        _engineOn = on;
-    }
+    _engineOn = (on && _batteryDriver.GetMasterSwitch());
 }
 
 bool SimulatorControlModel::GetEngineOn()
@@ -90,28 +93,39 @@ void SimulatorControlModel::processEngineStep()
     float engineSpinup = ENGINE_SPINUP * PHYSICS_DELTAT;
     if (_engineOn)
     {
-        if (_engineRpms < _throttle - engineSpinup/2.0)
+        if (_enginePercent < _throttle - engineSpinup/2.0)
         {
-            _engineRpms += engineSpinup;
+            _enginePercent += engineSpinup;
         }
-        else if (_engineRpms > _throttle + engineSpinup/2.0)
+        else if (_enginePercent > _throttle + engineSpinup/2.0)
         {
-            _engineRpms -= engineSpinup;
+            _enginePercent -= engineSpinup;
         }
     }
     else
     {
         // Spin down the rpms if engine is off
-        _engineRpms -= engineSpinup;
+        _enginePercent -= engineSpinup;
     }    
 
     // Engine clamping
-    if (_engineRpms > 100.0)
+    if (_enginePercent > 100.0)
     {
-        _engineRpms = 100.0;
+        _enginePercent = 100.0;
     }
-    else if (_engineRpms < 0.0)
+    else if (_enginePercent < 0.0)
     {
+        _enginePercent = 0.0;
+    }
+
+    // Convert to RPMs
+    if (_engineOn)
+    {
+        _engineRpms = ENGINE_RPM_IDLE + (ENGINE_RPM_MAX - ENGINE_RPM_IDLE) * (_enginePercent / 100.0);
+    }
+    else
+    {
+        // TODO - this doesn't have any spindown.
         _engineRpms = 0.0;
     }
 }
@@ -160,10 +174,10 @@ void SimulatorControlModel::processReverserStep()
     // Apply engine power through reverser
     if (_batteryDriver.GetMasterSwitch() == true)
     {
-        if (_engineRpms > 0.0 &&
+        if (_enginePercent > 0.0 &&
                 (_speed * _reverserDirection > 0 || fabs(_speed) < 0.5))    // The transmission only allows power to be applied if the reverser is in same direction of travel.
         {
-            _speed += _reverserDirection * sqrt(ENGINE_POWER * _engineRpms) * PHYSICS_DELTAT;
+            _speed += _reverserDirection * sqrt(ENGINE_POWER * _enginePercent) * PHYSICS_DELTAT;
         }
     }
 }
@@ -189,15 +203,15 @@ void SimulatorControlModel::processSmokeStep()
     float speedSmokePercent = 0.0;
 
     // Smoke from throttle being ahead of engine rpms.  Unburnt fuel.
-    if (_engineOn && _throttle > _engineRpms)
+    if (_engineOn && _throttle > _enginePercent)
     {
-        overThrottleSmokePercent = (_throttle - _engineRpms) * SMOKE_OVERTHROTTLE_FACTOR;
+        overThrottleSmokePercent = (_throttle - _enginePercent) * SMOKE_OVERTHROTTLE_FACTOR;
     }
 
     // Smoke from the engine doing work, in the physics sense.  It's similar to the equation above for change in speed.
     if (_engineOn)
     {
-        engineWorkSmokePercent = sqrt(_engineRpms) * SMOKE_ENGINE_WORK_FACTOR;
+        engineWorkSmokePercent = sqrt(_enginePercent) * SMOKE_ENGINE_WORK_FACTOR;
     }
 
     // Make more smoke when the train is accelerating.

@@ -6,6 +6,7 @@ ToyControlModel::ToyControlModel(BatteryDriver &batteryDriver)
     _throttle = 0.0;
     _reverserDirection = 1;
 
+    _enginePercent = 0.0;
     _engineRpms = 0.0;
     _smokePercent = 0.0;
 }
@@ -19,6 +20,11 @@ float ToyControlModel::GetSpeed()
 float ToyControlModel::GetEngineRpms()
 {
     return _engineRpms;
+}
+
+float ToyControlModel::GetEnginePercent()
+{
+    return _enginePercent;
 }
 
 float ToyControlModel::GetSmokePercent()
@@ -85,7 +91,8 @@ void ToyControlModel::clampSpeed()
 
 void ToyControlModel::ProcessStep()
 {
-    _engineRpms = _throttle;
+    _enginePercent = _throttle;
+    _engineRpms = ENGINE_RPM_IDLE + (ENGINE_RPM_MAX - ENGINE_RPM_IDLE) * (_enginePercent / 100.0);
     _speed = _engineRpms * _reverserDirection;
     _smokePercent = _engineRpms;
 
