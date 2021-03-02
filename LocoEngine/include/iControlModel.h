@@ -7,6 +7,8 @@ public:
     IControlModel() { }
     virtual ~IControlModel() { }
 
+    virtual int GetControlModelId() = 0;
+
     virtual float GetSpeed() = 0;
     virtual float GetEngineRpms() = 0;
     virtual float GetEnginePercent() = 0;

@@ -31,7 +31,7 @@ enum HeadlightModes
 
 class LightingDriver
 {
-    IControlModel &_controlModel;
+    IControlModel* _ptrControlModel;
     BatteryDriver &_batteryDriver;
 
 
@@ -39,7 +39,7 @@ class LightingDriver
     HeadlightModes _headlightMode;
 
 public:
-    LightingDriver(IControlModel &controlModel, BatteryDriver &batteryDriver);
+    LightingDriver(IControlModel* ptrControlModel, BatteryDriver &batteryDriver);
 
     void SetCabLights(bool on);
     bool GetCabLights();
@@ -48,6 +48,7 @@ public:
 
     void Setup();
     void ProcessStep();
+    void ChangeControlModel(IControlModel* newControlModel);
 };
 
 

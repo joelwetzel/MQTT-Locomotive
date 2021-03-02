@@ -27,6 +27,8 @@ public:
     ToyControlModel(BatteryDriver &batteryDriver);
     ~ToyControlModel() { }
 
+    int GetControlModelId();
+    
     float GetSpeed();
     float GetEngineRpms();
     float GetEnginePercent();

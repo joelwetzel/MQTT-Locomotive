@@ -1,11 +1,11 @@
 #include <PubSubClient.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
-//#include <ArduinoOTA.h>     // https://github.com/esp8266/Arduino/tree/master/libraries/ArduinoOTA
 
 #include "iControlModel.h"
 #include "lightingDriver.h"
 #include "soundController.h"
+
 #include "batteryDriver.h"
 #include "smokeDriver.h"
 #include "config.h"
@@ -18,7 +18,7 @@ class MqttHandler
 {
     PubSubClient &_mqttClient;
 
-    IControlModel &_controlModel;
+    IControlModel* _ptrControlModel;
     LightingDriver &_lightingDriver;
     SoundController &_soundController;
     BatteryDriver &_batteryDriver;
@@ -32,6 +32,8 @@ class MqttHandler
 
     bool boot = true;
 
+    int _lastControlModelId;
+
     bool _lastEngineOn;
     float _lastEngineRpms;
     int _lastReverser;
@@ -42,6 +44,8 @@ class MqttHandler
     
     int _publishCounter;
 
+    int _desiredControlModelId;
+
     void setup_wifi();
     void reconnect();
     void republishCommands();
@@ -49,11 +53,14 @@ class MqttHandler
     void publish(const char *topic, int value);
 
 public:
-    MqttHandler(PubSubClient &mqttClient, IControlModel &controlModel, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver);
+    MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlModel, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver);
 
     void Setup();
     void Loop();
     void ProcessStep();
+    void ChangeControlModel(IControlModel* newControlModel);
+
+    int GetDesiredControlModelId();
 };
 
 

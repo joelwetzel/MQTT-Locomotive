@@ -12,6 +12,12 @@ ToyControlModel::ToyControlModel(BatteryDriver &batteryDriver)
 }
 
 
+int ToyControlModel::GetControlModelId()
+{
+    return 2;
+}
+
+
 float ToyControlModel::GetSpeed()
 {
     return _speed;
@@ -93,8 +99,8 @@ void ToyControlModel::ProcessStep()
 {
     _enginePercent = _throttle;
     _engineRpms = ENGINE_RPM_IDLE + (ENGINE_RPM_MAX - ENGINE_RPM_IDLE) * (_enginePercent / 100.0);
-    _speed = _engineRpms * _reverserDirection;
-    _smokePercent = _engineRpms;
+    _speed = _enginePercent * _reverserDirection;
+    _smokePercent = _enginePercent;
 
     clampSpeed();
 }

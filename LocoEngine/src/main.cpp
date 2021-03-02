@@ -2,6 +2,7 @@
 #include <SimpleTimer.h>    // https://github.com/marcelloromani/Arduino-SimpleTimer/tree/master/SimpleTimer
 #include <PubSubClient.h>   // https://github.com/knolleary/pubsubclient
 #include <math.h>
+#include <ArxSmartPtr.h>
 
 #include "config.h"
 
@@ -25,27 +26,40 @@ SimpleTimer timer;
 
 BatteryDriver batteryDriver;
 
+SimulatorControlModel refSimulatorControlModel(batteryDriver);
+IControlModel* ptrSimulatorControlModel(&refSimulatorControlModel);
+
+ToyControlModel refToyControlModel(batteryDriver);
+IControlModel* ptrToyControlModel(&refToyControlModel);
+
 #ifdef SIMULATOR_CONTROL_MODEL
-SimulatorControlModel controlModel(batteryDriver);
+IControlModel* ptrControlModel = ptrSimulatorControlModel;
 #elif defined TOY_CONTROL_MODEL
-ToyControlModel controlModel(batteryDriver);
+IControlModel* ptrControlModel = ptrToyControlModel;
 #endif
 
 MotorDriver motorDriver;
 SmokeDriver smokeDriver;
-LightingDriver lightingDriver(controlModel, batteryDriver);
+LightingDriver lightingDriver(ptrControlModel, batteryDriver);
 SoundController soundController;
-MqttHandler mqttHandler(mqttClient, controlModel, lightingDriver, soundController, batteryDriver, smokeDriver);
+MqttHandler mqttHandler(mqttClient, ptrControlModel, lightingDriver, soundController, batteryDriver, smokeDriver);
 
 /*****************  END GLOBALS SECTION ***********************************/
+
+void changeControlModel(IControlModel* newPtr)
+{
+  ptrControlModel = newPtr;
+  lightingDriver.ChangeControlModel(newPtr);
+  mqttHandler.ChangeControlModel(newPtr);
+}
 
 
 void processStep()
 {
   batteryDriver.ProcessStep();
-  controlModel.ProcessStep();
-  motorDriver.SetMotorSpeed(controlModel.GetSpeed());
-  smokeDriver.SetSmokePercent(controlModel.GetSmokePercent());
+  ptrControlModel->ProcessStep();
+  motorDriver.SetMotorSpeed(ptrControlModel->GetSpeed());
+  smokeDriver.SetSmokePercent(ptrControlModel->GetSmokePercent());
   lightingDriver.ProcessStep();
   soundController.ProcessStep();
   mqttHandler.ProcessStep();
@@ -83,5 +97,19 @@ void setup()
 void loop()
 {
   mqttHandler.Loop();
+
+  int desiredControlModelId = mqttHandler.GetDesiredControlModelId();
+  if (desiredControlModelId != ptrControlModel->GetControlModelId() && ptrControlModel->GetSpeed() < 0.1)
+  {
+    if (desiredControlModelId == 1)
+    {
+      changeControlModel(ptrSimulatorControlModel);
+    }
+    else if (desiredControlModelId == 2)
+    {
+      changeControlModel(ptrToyControlModel);
+    }
+  }
+
   timer.run();
 }

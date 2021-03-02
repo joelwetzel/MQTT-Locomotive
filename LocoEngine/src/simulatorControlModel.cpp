@@ -17,6 +17,12 @@ SimulatorControlModel::SimulatorControlModel(BatteryDriver &batteryDriver)
 }
 
 
+int SimulatorControlModel::GetControlModelId()
+{
+    return 1;
+}
+
+
 float SimulatorControlModel::GetSpeed()
 {
     return _speed;

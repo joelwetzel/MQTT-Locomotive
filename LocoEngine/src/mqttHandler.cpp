@@ -1,9 +1,11 @@
 #include "mqttHandler.h"
 
 
-MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel &controlModel, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver)
-    : _mqttClient(mqttClient), _controlModel(controlModel), _lightingDriver(lightingDriver), _soundController(soundController), _batteryDriver(batteryDriver), _smokeDriver(smokeDriver)
+MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlModel, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver)
+    : _mqttClient(mqttClient), _ptrControlModel(ptrControlModel), _lightingDriver(lightingDriver), _soundController(soundController), _batteryDriver(batteryDriver), _smokeDriver(smokeDriver)
 {
+    _lastControlModelId = -1;
+
     _lastEngineOn = false;
     _lastEngineRpms = -1;
     _lastReverser = 0;
@@ -13,6 +15,8 @@ MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel &controlModel, 
     _lastHorn = false;
 
     _publishCounter = 0;
+
+    _desiredControlModelId = ptrControlModel->GetControlModelId();
 }
 
 
@@ -42,17 +46,17 @@ void MqttHandler::Setup()
 
         if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/throttle")
         {
-            _controlModel.SetThrottle(floatPayload);
+            _ptrControlModel->SetThrottle(floatPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/throttle", floatPayload);
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/brake")
         {
-            _controlModel.SetBrake(floatPayload);
+            _ptrControlModel->SetBrake(floatPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/brake", floatPayload);
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser")
         {
-            _controlModel.SetReverser(intPayload);
+            _ptrControlModel->SetReverser(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/reverser", intPayload);
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights")
@@ -82,18 +86,22 @@ void MqttHandler::Setup()
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon")
         {
-            _controlModel.SetEngineOn(intPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", _controlModel.GetEngineOn());
+            _ptrControlModel->SetEngineOn(intPayload);
+            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", _ptrControlModel->GetEngineOn());
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke")
         {
             _smokeDriver.SetSmokeDisabled(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/disablesmoke", intPayload);
         }
+        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/setcontrolmodel")
+        {
+            if (intPayload == 1 || intPayload == 2)
+            {
+                _desiredControlModelId = intPayload;
+            }
+        }
     });
-
-//    ArduinoOTA.setHostname(USER_DEVICE_NETWORK_ID);
-//    ArduinoOTA.begin();
 }
 
 
@@ -158,6 +166,7 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/setcontrolmodel");
       } 
       else 
       {
@@ -181,16 +190,18 @@ void MqttHandler::reconnect()
 
 void MqttHandler::republishCommands()
 {
-    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/throttle", _controlModel.GetThrottle());
-    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/brake", _controlModel.GetBrake());
-    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser", _controlModel.GetReverser());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch", _batteryDriver.GetMasterSwitch());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon", _ptrControlModel->GetEngineOn());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser", _ptrControlModel->GetReverser());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/throttle", _ptrControlModel->GetThrottle());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/brake", _ptrControlModel->GetBrake());
+
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights", _lightingDriver.GetCabLights());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights", _lightingDriver.GetHeadlights());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell", _soundController.GetBell());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn", _soundController.GetHorn());
-    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch", _batteryDriver.GetMasterSwitch());
-    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon", _controlModel.GetEngineOn());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke", _smokeDriver.GetSmokeDisabled());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/setcontrolmodel", _ptrControlModel->GetControlModelId());
 }
 
 
@@ -203,7 +214,6 @@ void MqttHandler::Loop()
     }
 
     _mqttClient.loop();
-//    ArduinoOTA.handle();
 }
 
 
@@ -213,14 +223,32 @@ void MqttHandler::ProcessStep()
     //   - They have changed
     //   - Or every 60 seconds
 
+    int controlModelId = _ptrControlModel->GetControlModelId();
     bool masterSwitch = _batteryDriver.GetMasterSwitch();
-    bool engineOn = _controlModel.GetEngineOn();
-    float engineRpms = _controlModel.GetEngineRpms();
-    int reverser = _controlModel.GetReverser();
-    float smokePercent = _controlModel.GetSmokePercent();
-    float speed = _controlModel.GetSpeed();
+    bool engineOn = _ptrControlModel->GetEngineOn();
+    float engineRpms = _ptrControlModel->GetEngineRpms();
+    int reverser = _ptrControlModel->GetReverser();
+    float smokePercent = _ptrControlModel->GetSmokePercent();
+    float speed = _ptrControlModel->GetSpeed();
     bool bell = _soundController.GetBell();
     bool horn = _soundController.GetHorn();
+
+    if (boot)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", _batteryDriver.GetMasterSwitch());
+    }
+
+    if ((engineOn != _lastEngineOn || _publishCounter % 301 == 0) || boot)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", engineOn);
+        _lastEngineOn = engineOn;
+    }
+
+    if ((reverser != _lastReverser) || boot)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/reverser", reverser);
+        _lastReverser = reverser;
+    }
 
     if ((fabs(engineRpms - _lastEngineRpms) > 0.05 && _publishCounter % 47 == 0) || _publishCounter % 500 == 0)
     {
@@ -228,16 +256,16 @@ void MqttHandler::ProcessStep()
         _lastEngineRpms = engineRpms;
     }
 
-    if ((fabs(smokePercent - _lastSmokePercent) > 0.05 && _publishCounter % 50 == 0) || _publishCounter % 502 == 0)
-    {
-        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/smokepercent", smokePercent);
-        _lastSmokePercent = smokePercent;
-    }
-
     if ((fabs(speed - _lastSpeed) > 0.01 && _publishCounter % 52 == 0) || _publishCounter % 504 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/speed", speed);
         _lastSpeed = speed;
+    }
+
+    if ((fabs(smokePercent - _lastSmokePercent) > 0.05 && _publishCounter % 50 == 0) || _publishCounter % 502 == 0)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/smokepercent", smokePercent);
+        _lastSmokePercent = smokePercent;
     }
 
     if ((bell != _lastBell) || boot)
@@ -252,23 +280,6 @@ void MqttHandler::ProcessStep()
         _lastHorn = horn;
     }
 
-    if ((reverser != _lastReverser) || boot)
-    {
-        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/reverser", reverser);
-        _lastReverser = reverser;
-    }
-
-    if (boot)
-    {
-        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", _batteryDriver.GetMasterSwitch());
-    }
-
-    if ((engineOn != _lastEngineOn || _publishCounter % 301 == 0) || boot)
-    {
-        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", engineOn);
-        _lastEngineOn = engineOn;
-    }
-
     if (_publishCounter % 396 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/battery", _batteryDriver.GetVoltage());
@@ -278,6 +289,12 @@ void MqttHandler::ProcessStep()
     {
         _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/engineStatus", "OK"); 
         _publishCounter = 0;
+    }
+
+    if (controlModelId != _lastControlModelId)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/controlmodel", controlModelId);
+        _lastControlModelId = controlModelId;
     }
 
     _publishCounter++;
@@ -301,4 +318,16 @@ void MqttHandler::publish(const char *topic, int value)
     String tempStr = String(value);
     tempStr.toCharArray(charArray, tempStr.length() + 1);
     _mqttClient.publish(topic, charArray);
+}
+
+
+void MqttHandler::ChangeControlModel(IControlModel* newControlModel)
+{
+    _ptrControlModel = newControlModel;
+}
+
+
+int MqttHandler::GetDesiredControlModelId()
+{
+    return _desiredControlModelId;
 }

@@ -45,6 +45,8 @@ public:
     SimulatorControlModel(BatteryDriver &batteryDriver);
     ~SimulatorControlModel() { }
 
+    int GetControlModelId();
+    
     float GetSpeed();
     float GetEngineRpms();
     float GetEnginePercent();
