@@ -58,7 +58,7 @@ void processStep()
 {
   batteryDriver.ProcessStep();
   ptrControlModel->ProcessStep();
-  motorDriver.SetMotorSpeed(ptrControlModel->GetSpeed());
+  motorDriver.SetMotorSpeed(ptrControlModel->GetSpeedPercent());
   smokeDriver.SetSmokePercent(ptrControlModel->GetSmokePercent());
   lightingDriver.ProcessStep();
   soundController.ProcessStep();
@@ -99,7 +99,7 @@ void loop()
   mqttHandler.Loop();
 
   int desiredControlModelId = mqttHandler.GetDesiredControlModelId();
-  if (desiredControlModelId != ptrControlModel->GetControlModelId() && ptrControlModel->GetSpeed() < 0.1)
+  if (desiredControlModelId != ptrControlModel->GetControlModelId() && ptrControlModel->GetSpeedPercent() < 0.1)
   {
     if (desiredControlModelId == 1)
     {

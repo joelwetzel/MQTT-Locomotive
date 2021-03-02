@@ -1,6 +1,10 @@
 #ifndef ICONTROLMODEL_H
 #define ICONTROLMODEL_H
 
+#define SPEEDPERCENT_TO_WHEEL_RPMS      0.325
+#define WHEEL_RPM_TO_MPH                2.0
+
+
 class IControlModel
 {
 public:
@@ -9,7 +13,8 @@ public:
 
     virtual int GetControlModelId() = 0;
 
-    virtual float GetSpeed() = 0;
+    virtual float GetSpeedMph() = 0;
+    virtual float GetSpeedPercent() = 0;
     virtual float GetEngineRpms() = 0;
     virtual float GetEnginePercent() = 0;
     virtual float GetSmokePercent() = 0;

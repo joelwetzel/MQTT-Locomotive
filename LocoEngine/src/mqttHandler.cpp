@@ -10,7 +10,7 @@ MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlMode
     _lastEngineRpms = -1;
     _lastReverser = 0;
     _lastSmokePercent = -1;
-    _lastSpeed = -1;
+    _lastSpeedPercent = -1;
     _lastBell = false;
     _lastHorn = false;
 
@@ -224,12 +224,11 @@ void MqttHandler::ProcessStep()
     //   - Or every 60 seconds
 
     int controlModelId = _ptrControlModel->GetControlModelId();
-    bool masterSwitch = _batteryDriver.GetMasterSwitch();
     bool engineOn = _ptrControlModel->GetEngineOn();
     float engineRpms = _ptrControlModel->GetEngineRpms();
     int reverser = _ptrControlModel->GetReverser();
     float smokePercent = _ptrControlModel->GetSmokePercent();
-    float speed = _ptrControlModel->GetSpeed();
+    float speedPercent = _ptrControlModel->GetSpeedPercent();
     bool bell = _soundController.GetBell();
     bool horn = _soundController.GetHorn();
 
@@ -256,10 +255,11 @@ void MqttHandler::ProcessStep()
         _lastEngineRpms = engineRpms;
     }
 
-    if ((fabs(speed - _lastSpeed) > 0.01 && _publishCounter % 52 == 0) || _publishCounter % 504 == 0)
+    if ((fabs(speedPercent - _lastSpeedPercent) > 0.01 && _publishCounter % 52 == 0) || _publishCounter % 504 == 0)
     {
-        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/speed", speed);
-        _lastSpeed = speed;
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/speedpercent", speedPercent);
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/speedmph", _ptrControlModel->GetSpeedMph());
+        _lastSpeedPercent = speedPercent;
     }
 
     if ((fabs(smokePercent - _lastSmokePercent) > 0.05 && _publishCounter % 50 == 0) || _publishCounter % 502 == 0)

@@ -9,11 +9,10 @@ SimulatorControlModel::SimulatorControlModel(BatteryDriver &batteryDriver)
     _reverserDirection = 0;
 
     _enginePercent = 0.0;
-    _engineRpms = 0.0;
     _smokePercent = 0.0;
 
-    _previousSpeed = 0.0;
-    _speed = 0.0;
+    _previousSpeedPercent = 0.0;
+    _speedPercent = 0.0;
 }
 
 
@@ -23,9 +22,14 @@ int SimulatorControlModel::GetControlModelId()
 }
 
 
-float SimulatorControlModel::GetSpeed()
+float SimulatorControlModel::GetSpeedMph()
 {
-    return _speed;
+    return _speedPercent * SPEEDPERCENT_TO_WHEEL_RPMS * WHEEL_RPM_TO_MPH;
+}
+
+float SimulatorControlModel::GetSpeedPercent()
+{
+    return _speedPercent;
 }
 
 float SimulatorControlModel::GetEnginePercent()
@@ -35,7 +39,16 @@ float SimulatorControlModel::GetEnginePercent()
 
 float SimulatorControlModel::GetEngineRpms()
 {
-    return _engineRpms;
+    // Convert to RPMs
+    if (_engineOn)
+    {
+        return ENGINE_RPM_IDLE + (ENGINE_RPM_MAX - ENGINE_RPM_IDLE) * (_enginePercent / 100.0);
+    }
+    else
+    {
+        // TODO - this doesn't have any spindown.
+        return 0.0;
+    }
 }
 
 float SimulatorControlModel::GetSmokePercent()
@@ -122,18 +135,7 @@ void SimulatorControlModel::processEngineStep()
     else if (_enginePercent < 0.0)
     {
         _enginePercent = 0.0;
-    }
-
-    // Convert to RPMs
-    if (_engineOn)
-    {
-        _engineRpms = ENGINE_RPM_IDLE + (ENGINE_RPM_MAX - ENGINE_RPM_IDLE) * (_enginePercent / 100.0);
-    }
-    else
-    {
-        // TODO - this doesn't have any spindown.
-        _engineRpms = 0.0;
-    }
+    }    
 }
 
 
@@ -142,7 +144,7 @@ void SimulatorControlModel::processResistanceStep()
     float resistance = 0.0;
 
     // Air resistance
-    resistance += AIR_RESISTANCE_FACTOR * _speed * _speed;
+    resistance += AIR_RESISTANCE_FACTOR * _speedPercent * _speedPercent;
 
     // Rolling resistance
     resistance += ROLLING_RESISTANCE_FACTOR;
@@ -154,22 +156,22 @@ void SimulatorControlModel::processResistanceStep()
     }
 
     // Apply resistance
-    if (_speed > 0.0)
+    if (_speedPercent > 0.0)
     {
-        _speed -= resistance * PHYSICS_DELTAT;
+        _speedPercent -= resistance * PHYSICS_DELTAT;
 
-        if (_speed < 0.0)       // Resistance can't change the direction of travel
+        if (_speedPercent < 0.0)       // Resistance can't change the direction of travel
         {
-            _speed = 0.0;
+            _speedPercent = 0.0;
         }
     }
-    else if (_speed < 0.0)
+    else if (_speedPercent < 0.0)
     {
-        _speed += resistance * PHYSICS_DELTAT;
+        _speedPercent += resistance * PHYSICS_DELTAT;
 
-        if (_speed > 0.0)       // Resistance can't change the direction of travel
+        if (_speedPercent > 0.0)       // Resistance can't change the direction of travel
         {
-            _speed = 0.0;
+            _speedPercent = 0.0;
         }
     }
 }
@@ -181,9 +183,9 @@ void SimulatorControlModel::processReverserStep()
     if (_batteryDriver.GetMasterSwitch() == true)
     {
         if (_enginePercent > 0.0 &&
-                (_speed * _reverserDirection > 0 || fabs(_speed) < 0.5))    // The transmission only allows power to be applied if the reverser is in same direction of travel.
+                (_speedPercent * _reverserDirection > 0 || fabs(_speedPercent) < 0.5))    // The transmission only allows power to be applied if the reverser is in same direction of travel.
         {
-            _speed += _reverserDirection * sqrt(ENGINE_POWER * _enginePercent) * PHYSICS_DELTAT;
+            _speedPercent += _reverserDirection * sqrt(ENGINE_POWER * _enginePercent) * PHYSICS_DELTAT;
         }
     }
 }
@@ -191,13 +193,13 @@ void SimulatorControlModel::processReverserStep()
 
 void SimulatorControlModel::clampSpeed()
 {
-    if (_speed > 100.0)
+    if (_speedPercent > 100.0)
     {
-        _speed = 100.0;
+        _speedPercent = 100.0;
     }
-    else if (_speed < -100.0)
+    else if (_speedPercent < -100.0)
     {
-        _speed = -100.0;
+        _speedPercent = -100.0;
     }
 }
 
@@ -250,7 +252,7 @@ void SimulatorControlModel::ProcessStep()
     clampSpeed();
     processSmokeStep();
     
-    _previousSpeed = _speed;
+    _previousSpeedPercent = _speedPercent;
 }
 
 
