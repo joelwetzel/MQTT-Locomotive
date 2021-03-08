@@ -2,7 +2,6 @@
 #include <SimpleTimer.h>    // https://github.com/marcelloromani/Arduino-SimpleTimer/tree/master/SimpleTimer
 #include <PubSubClient.h>   // https://github.com/knolleary/pubsubclient
 #include <math.h>
-#include <ArxSmartPtr.h>
 
 #include "config.h"
 
