@@ -15,6 +15,7 @@
 #include "soundController.h"
 #include "batteryDriver.h"
 #include "smokeDriver.h"
+#include "tachDriver.h"
 
 
 /*****************  START GLOBALS SECTION ***********************************/
@@ -39,9 +40,10 @@ IControlModel* ptrControlModel = ptrToyControlModel;
 
 MotorDriver motorDriver;
 SmokeDriver smokeDriver;
+TachDriver tachDriver;
 LightingDriver lightingDriver(ptrControlModel, batteryDriver);
 SoundController soundController;
-MqttHandler mqttHandler(mqttClient, ptrControlModel, lightingDriver, soundController, batteryDriver, smokeDriver);
+MqttHandler mqttHandler(mqttClient, ptrControlModel, lightingDriver, soundController, batteryDriver, smokeDriver, tachDriver);
 
 /*****************  END GLOBALS SECTION ***********************************/
 
@@ -59,6 +61,7 @@ void processStep()
   ptrControlModel->ProcessStep();
   motorDriver.SetMotorSpeed(ptrControlModel->GetSpeedPercent());
   smokeDriver.SetSmokePercent(ptrControlModel->GetSmokePercent());
+  tachDriver.ProcessStep();
   lightingDriver.ProcessStep();
   soundController.ProcessStep();
   mqttHandler.ProcessStep();
@@ -78,6 +81,7 @@ void setup()
 
   motorDriver.Setup();
   smokeDriver.Setup();
+  tachDriver.Setup();
   mqttHandler.Setup();
   lightingDriver.Setup();
   soundController.Setup();

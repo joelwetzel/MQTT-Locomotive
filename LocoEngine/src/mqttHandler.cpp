@@ -1,8 +1,8 @@
 #include "mqttHandler.h"
 
 
-MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlModel, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver)
-    : _mqttClient(mqttClient), _ptrControlModel(ptrControlModel), _lightingDriver(lightingDriver), _soundController(soundController), _batteryDriver(batteryDriver), _smokeDriver(smokeDriver)
+MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlModel, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver, TachDriver &tachDriver)
+    : _mqttClient(mqttClient), _ptrControlModel(ptrControlModel), _lightingDriver(lightingDriver), _soundController(soundController), _batteryDriver(batteryDriver), _smokeDriver(smokeDriver), _tachDriver(tachDriver)
 {
     _lastControlModelId = -1;
 
@@ -10,6 +10,7 @@ MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlMode
     _lastEngineRpms = -1;
     _lastReverser = 0;
     _lastSmokePercent = -1;
+    _lastWheelRpm = 0.0;
     _lastSpeedPercent = -1;
     _lastBell = false;
     _lastHorn = false;
@@ -228,6 +229,7 @@ void MqttHandler::ProcessStep()
     float engineRpms = _ptrControlModel->GetEngineRpms();
     int reverser = _ptrControlModel->GetReverser();
     float smokePercent = _ptrControlModel->GetSmokePercent();
+    float wheelRpm = _tachDriver.GetWheelRpm();
     float speedPercent = _ptrControlModel->GetSpeedPercent();
     bool bell = _soundController.GetBell();
     bool horn = _soundController.GetHorn();
@@ -266,6 +268,12 @@ void MqttHandler::ProcessStep()
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/smokepercent", smokePercent);
         _lastSmokePercent = smokePercent;
+    }
+
+    if ((fabs(wheelRpm - _lastWheelRpm) > 0.05 && _publishCounter % 51 == 0) || _publishCounter % 201 == 0)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/wheelrpm", wheelRpm);
+        _lastWheelRpm = wheelRpm;
     }
 
     if ((bell != _lastBell) || boot)
