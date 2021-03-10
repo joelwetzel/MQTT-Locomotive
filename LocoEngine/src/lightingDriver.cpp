@@ -12,7 +12,7 @@ void LightingDriver::SetCabLights(bool on)
 {
     _cabLightsOn = on;
 
-    if (_batteryDriver.GetMasterSwitch())
+    if (!_batteryDriver.GetMasterSwitch())
     {
         _cabLightsOn = false;
     }
@@ -46,7 +46,7 @@ void LightingDriver::SetHeadlights(int mode)
             break;
     }
 
-    if (_batteryDriver.GetMasterSwitch())
+    if (!_batteryDriver.GetMasterSwitch())
     {
         _headlightMode = HeadlightModes::Off;
     }

@@ -13,7 +13,7 @@
     #define FRONT_PIN D7
     #define REAR_PIN D8
 #elif ARDUINO_ESP8266_WEMOS_D1MINI
-    #define CAB_PIN D6
+    #define CAB_PIN D3
     #define FRONT_PIN D7
     #define REAR_PIN D8
 #endif
