@@ -29,15 +29,15 @@ void TachDriver::HandleInterrupt()
   // We're debouncing on both rise and fall, but we only want to increment the counter on rise.
   if (!measurementState)
   {
-    long currentMillis = millis();
+    unsigned long currentMicros = micros();
 
-    if (lastPulseMillis != 0)
+    if (lastPulseMicros != 0)
     {
-      lastPulseDelta = currentMillis - lastPulseMillis;
+      lastPulseDelta = currentMicros - lastPulseMicros;
       receivedPulse = true;
     }
 
-    lastPulseMillis = currentMillis;
+    lastPulseMicros = currentMicros;
   }
 }
 
@@ -48,7 +48,7 @@ void TachDriver::Setup()
 
     measurementState = 0;
 
-    lastPulseMillis = 0;
+    lastPulseMicros = 0;
     lastPulseDelta = 0;
     receivedPulse = false;
 
@@ -84,13 +84,22 @@ void TachDriver::ProcessStep()
 
         if (counterSinceReceivedPulse > 10)
         {
-            lastPulseDelta = millis() - lastPulseMillis + counterSinceReceivedPulse * 150;
+            lastPulseDelta = micros() - lastPulseMicros + counterSinceReceivedPulse * 150;
         }
     }
 
-    float unfilteredRpm = 60.0 * 1000.0 / (float)lastPulseDelta / NUM_MAGNETS;
+    float unfilteredRpm = 60.0 * 1000.0 * 1000.0 / (float)lastPulseDelta / NUM_MAGNETS;
 
-    rpm = rpm + LOW_PASS_FILTER_ALPHA * (unfilteredRpm - rpm);
+    
+    if (fabs(unfilteredRpm - rpm) > 300)
+    {
+      // Throw out anomalous readings
+    }
+    else
+    {
+      // Use the new measurement, by applying a low pass filter
+      rpm = rpm + LOW_PASS_FILTER_ALPHA * (unfilteredRpm - rpm);
+    }
 
     if (rpm < 0.0 || isnan(rpm) || !hasEverReceivedPulse || counterSinceReceivedPulse > 33)
     {

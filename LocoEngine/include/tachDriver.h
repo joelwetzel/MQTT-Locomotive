@@ -24,8 +24,8 @@ class TachDriver
 
     volatile int measurementState;
 
-    volatile long lastPulseMillis;
-    volatile long lastPulseDelta;
+    volatile unsigned long lastPulseMicros;
+    volatile unsigned long lastPulseDelta;
     volatile bool receivedPulse;
 
     float rpm;

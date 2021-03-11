@@ -24,7 +24,7 @@ int SimulatorControlModel::GetControlModelId()
 
 float SimulatorControlModel::GetSpeedMph()
 {
-    return _speedPercent * SPEEDPERCENT_TO_WHEEL_RPMS * WHEEL_RPM_TO_MPH;
+    return fabs(_speedPercent * SPEEDPERCENT_TO_WHEEL_RPMS * WHEEL_RPM_TO_MPH);
 }
 
 float SimulatorControlModel::GetSpeedPercent()

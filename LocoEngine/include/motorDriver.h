@@ -15,8 +15,8 @@
 #endif
 
 // Values for 16384Hz pwm
-#define MIN_SPEED_PWM             580.0
-#define MAX_SPEED_PWM             760.0
+#define MIN_SPEED_PWM             560.0
+#define MAX_SPEED_PWM             640.0     // 760.0
 
 
 class MotorDriver
