@@ -1,8 +1,6 @@
 #ifndef ICONTROLMODEL_H
 #define ICONTROLMODEL_H
 
-#define SPEEDPERCENT_TO_WHEEL_RPMS      5.2
-#define WHEEL_RPM_TO_MPH                0.1
 
 
 class IControlModel

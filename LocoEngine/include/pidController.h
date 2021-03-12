@@ -1,12 +1,18 @@
+#include "config.h"
+
 #ifndef PIDCONTROLLER_H
 #define PIDCONTROLLER_H
 
-#define P_FACTOR            0.2
-#define I_FACTOR            0.01
-#define D_FACTOR            0.02
+#define P_FACTOR            1.2 / SPEEDPERCENT_TO_WHEEL_RPMS
+
+#define T_i                 1000000.0
+#define T_d                 0.0           
+
+#define I_FACTOR            P_FACTOR / T_i
+#define D_FACTOR            P_FACTOR * T_d
 
 #define MAX_I_TERM          80.0
-#define MIN_I_TERM          -20.0
+#define MIN_I_TERM          -80.0
 #define MIN_ACTIVE_CONTROL_VALUE    5.0
 
 class PidController
