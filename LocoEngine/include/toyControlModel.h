@@ -33,6 +33,7 @@ public:
     float GetEngineRpms();
     float GetEnginePercent();
     float GetSmokePercent();
+    float GetEstimatedWheelRpms();
 
     void SetEngineOn(bool on);
     bool GetEngineOn();

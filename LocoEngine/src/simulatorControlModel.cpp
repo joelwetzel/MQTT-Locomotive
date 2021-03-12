@@ -56,6 +56,10 @@ float SimulatorControlModel::GetSmokePercent()
     return _smokePercent;
 }
 
+float SimulatorControlModel::GetEstimatedWheelRpms()
+{
+    return _speedPercent * SPEEDPERCENT_TO_WHEEL_RPMS;
+}
 
 
 void SimulatorControlModel::SetEngineOn(bool on)

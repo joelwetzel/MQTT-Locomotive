@@ -1,8 +1,14 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define SIMULATOR_CONTROL_MODEL
-//#define TOY_CONTROL_MODEL
+//#define SIMULATOR_CONTROL_MODEL
+#define TOY_CONTROL_MODEL
+
+//#define PUBLISH_CONTROL_MODEL
+#define PUBLISH_PID_CONTROLLER
+#define PUBLISH_TACH
+//#define PUBLISH_SOUNDS
+
 
 #define PHYSICS_DELTAT            30.0
 

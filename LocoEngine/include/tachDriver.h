@@ -8,7 +8,7 @@
 
 #define LOOP_DELAY                10
 #define NUM_MAGNETS               4.0
-#define LOW_PASS_FILTER_ALPHA     0.02
+#define LOW_PASS_FILTER_ALPHA     0.16
 
 
 #ifdef ARDUINO_ESP8266_NODEMCU
@@ -30,6 +30,7 @@ class TachDriver
 
     float rpm;
     int counterSinceReceivedPulse;
+    int numAnomalousReadings;
 
 public:
     TachDriver();

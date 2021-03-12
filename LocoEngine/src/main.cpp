@@ -9,6 +9,7 @@
 #include "simulatorControlModel.h"
 #include "toyControlModel.h"
 
+#include "pidController.h"
 #include "motorDriver.h"
 #include "mqttHandler.h"
 #include "lightingDriver.h"
@@ -38,12 +39,14 @@ IControlModel* ptrControlModel = ptrSimulatorControlModel;
 IControlModel* ptrControlModel = ptrToyControlModel;
 #endif
 
+PidController pidController;
 MotorDriver motorDriver;
 SmokeDriver smokeDriver;
 TachDriver tachDriver;
 LightingDriver lightingDriver(ptrControlModel, batteryDriver);
 SoundController soundController;
-MqttHandler mqttHandler(mqttClient, ptrControlModel, lightingDriver, soundController, batteryDriver, smokeDriver, tachDriver);
+
+MqttHandler mqttHandler(mqttClient, ptrControlModel, lightingDriver, soundController, batteryDriver, smokeDriver, tachDriver, pidController);
 
 /*****************  END GLOBALS SECTION ***********************************/
 
@@ -59,11 +62,21 @@ void processStep()
 {
   batteryDriver.ProcessStep();
   ptrControlModel->ProcessStep();
-  motorDriver.SetMotorSpeed(ptrControlModel->GetSpeedPercent());
+
+  // This is the simplistic version without PID control
+  // motorDriver.SetMotorSpeed(ptrControlModel->GetSpeedPercent());
+
+  float desiredWheelRpms = ptrControlModel->GetEstimatedWheelRpms();
+  float measuredWheelRpms = tachDriver.GetWheelRpm();
+  pidController.Update(desiredWheelRpms, measuredWheelRpms, micros());
+  float controlledMotorPercent = pidController.GetControlValue();
+  motorDriver.SetMotorSpeed(controlledMotorPercent);
+
   smokeDriver.SetSmokePercent(ptrControlModel->GetSmokePercent());
   tachDriver.ProcessStep();
   lightingDriver.ProcessStep();
   soundController.ProcessStep();
+
   mqttHandler.ProcessStep();
 }
 

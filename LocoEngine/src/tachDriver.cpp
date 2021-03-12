@@ -54,6 +54,7 @@ void TachDriver::Setup()
 
     rpm = 0.0;
     counterSinceReceivedPulse = 0;
+    numAnomalousReadings = 0;
 
     pinMode(TACH_PIN, INPUT);
 
@@ -91,12 +92,15 @@ void TachDriver::ProcessStep()
     float unfilteredRpm = 60.0 * 1000.0 * 1000.0 / (float)lastPulseDelta / NUM_MAGNETS;
 
     
-    if (fabs(unfilteredRpm - rpm) > 300)
+    if (fabs(unfilteredRpm - rpm) > 300 && numAnomalousReadings < 5)
     {
       // Throw out anomalous readings
+      numAnomalousReadings++;
     }
     else
     {
+      numAnomalousReadings = 0;
+
       // Use the new measurement, by applying a low pass filter
       rpm = rpm + LOW_PASS_FILTER_ALPHA * (unfilteredRpm - rpm);
     }

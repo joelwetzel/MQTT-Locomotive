@@ -43,6 +43,11 @@ float ToyControlModel::GetSmokePercent()
     return _smokePercent;
 }
 
+float ToyControlModel::GetEstimatedWheelRpms()
+{
+    return _speedPercent * SPEEDPERCENT_TO_WHEEL_RPMS;
+}
+
 
 
 void ToyControlModel::SetEngineOn(bool on)
