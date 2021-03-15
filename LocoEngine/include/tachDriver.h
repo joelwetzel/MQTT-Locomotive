@@ -8,7 +8,7 @@
 
 #define LOOP_DELAY                10
 #define NUM_MAGNETS               4.0
-#define LOW_PASS_FILTER_ALPHA     0.14
+#define LOW_PASS_FILTER_ALPHA     0.10
 
 
 #ifdef ARDUINO_ESP8266_NODEMCU

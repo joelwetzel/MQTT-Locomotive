@@ -91,8 +91,9 @@ void TachDriver::ProcessStep()
 
     float unfilteredRpm = 60.0 * 1000.0 * 1000.0 / (float)lastPulseDelta / NUM_MAGNETS;
 
-    
-    if (fabs(unfilteredRpm - rpm) > 300 && numAnomalousReadings < 5)
+    float rpmDelta = fabs(unfilteredRpm - rpm);
+    if ((rpmDelta > rpm/2.0 && rpm > 100.0)
+        && numAnomalousReadings < 5)
     {
       // Throw out anomalous readings
       numAnomalousReadings++;
