@@ -63,14 +63,15 @@ void processStep()
   batteryDriver.ProcessStep();
   ptrControlModel->ProcessStep();
 
-  // This is the simplistic version without PID control
-  // motorDriver.SetMotorSpeed(ptrControlModel->GetSpeedPercent());
-
+#ifdef DIRECT_SPEED_CONTROL
+  motorDriver.SetMotorSpeed(ptrControlModel->GetSpeedPercent());
+#elif defined PID_SPEED_CONTROL
   float desiredWheelRpms = ptrControlModel->GetEstimatedWheelRpms();
   float measuredWheelRpms = tachDriver.GetWheelRpm();
   pidController.Update(desiredWheelRpms, measuredWheelRpms, micros());
   float controlledMotorPercent = pidController.GetControlValue();
   motorDriver.SetMotorSpeed(controlledMotorPercent);
+#endif
 
   smokeDriver.SetSmokePercent(ptrControlModel->GetSmokePercent());
   tachDriver.ProcessStep();

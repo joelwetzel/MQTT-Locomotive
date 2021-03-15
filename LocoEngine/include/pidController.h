@@ -3,10 +3,11 @@
 #ifndef PIDCONTROLLER_H
 #define PIDCONTROLLER_H
 
-#define P_FACTOR            1.2 / SPEEDPERCENT_TO_WHEEL_RPMS
+// 1.2
+#define P_FACTOR            2.8 / SPEEDPERCENT_TO_WHEEL_RPMS
 
-#define T_i                 1000000.0
-#define T_d                 0.0           
+#define T_i                 100000000.0
+#define T_d                 0.03           
 
 #define I_FACTOR            P_FACTOR / T_i
 #define D_FACTOR            P_FACTOR * T_d
