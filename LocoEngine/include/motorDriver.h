@@ -17,7 +17,7 @@
 // 760
 
 // Values for 16384Hz pwm
-#define MIN_SPEED_PWM             565.0
+#define MIN_SPEED_PWM             575.0
 #define MAX_SPEED_PWM             660.0
 
 
