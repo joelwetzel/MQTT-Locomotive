@@ -20,7 +20,7 @@ int ToyControlModel::GetControlModelId()
 
 float ToyControlModel::GetSpeedMph()
 {
-    return _speedPercent * SPEEDPERCENT_TO_WHEEL_RPMS * WHEEL_RPM_TO_MPH;
+    return GetEstimatedWheelRpms() * WHEEL_RPM_TO_MPH;
 }
 
 float ToyControlModel::GetSpeedPercent()
@@ -45,7 +45,14 @@ float ToyControlModel::GetSmokePercent()
 
 float ToyControlModel::GetEstimatedWheelRpms()
 {
-    return _speedPercent * SPEEDPERCENT_TO_WHEEL_RPMS;
+    if (_speedPercent > 0.1)
+    {
+        return _speedPercent * SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE + SPEEDPERCENT_TO_WHEEL_RPMS_INTERCEPT;
+    }
+    else
+    {
+        return 0.0;
+    }
 }
 
 
