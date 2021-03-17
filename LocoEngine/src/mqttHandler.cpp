@@ -175,6 +175,7 @@ void MqttHandler::reconnect()
         if (boot)
         {
             _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/engineStatus", "Rebooted");
+            _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/engineIp", WiFi.localIP().toString().c_str());
             republishCommands();
             ProcessStep();
             boot = false;
