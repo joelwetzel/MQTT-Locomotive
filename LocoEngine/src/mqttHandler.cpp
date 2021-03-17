@@ -17,6 +17,7 @@ MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlMode
     _lastBattery = 0.0;
 
     _lastPidControlValue = 0.0;
+    _lastPidBTerm = 0.0;
     _lastPidPTerm = 0.0;
     _lastPidITerm = 0.0;
     _lastPidDTerm = 0.0;
@@ -309,6 +310,7 @@ void MqttHandler::ProcessStep()
     if (_publishCounter%23 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidControlValue", _pidController.GetControlValue());
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidBTerm", _pidController.GetBTerm());
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidPTerm", _pidController.GetPTerm());
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidITerm", _pidController.GetITerm());
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidDTerm", _pidController.GetDTerm());

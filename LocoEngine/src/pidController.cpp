@@ -9,6 +9,7 @@ PidController::PidController()
     _previousMicros = 0;
     _previousError = 0.0;
 
+    _bTerm = 0.0;
     _pTerm = 0.0;
     _iTerm = 0.0;
     _dTerm = 0.0;
@@ -28,6 +29,14 @@ void PidController::Update(float setpoint, float processVariableValue, unsigned 
     float error = setpoint - processVariableValue;
     unsigned long dt = currentMicros - _previousMicros;
 
+    // Predict a bias term
+    _bTerm = (setpoint - SPEEDPERCENT_TO_WHEEL_RPMS_INTERCEPT) / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE;
+    if (_bTerm < 0.0)
+    {
+        _bTerm = 0.0;
+    }
+
+    // P term is proportional to the error.
     _pTerm = P_FACTOR * error;
     
     _iTerm += I_FACTOR * error; // * ((float)dt / 1000.0 / PHYSICS_DELTAT);
@@ -57,7 +66,7 @@ void PidController::Update(float setpoint, float processVariableValue, unsigned 
         _dTerm = 0.0;
     }   
 
-    _controlValue = _pTerm + _iTerm + _dTerm;
+    _controlValue = _bTerm + _pTerm + _iTerm + _dTerm;
 
     // Clamp the motor percentage.
     if (_controlValue < 0.0)
@@ -75,12 +84,12 @@ void PidController::Update(float setpoint, float processVariableValue, unsigned 
     {
         _controlValue = MIN_ACTIVE_CONTROL_VALUE;
 
-        // // Reset the I term if we hit the minimum active control value
-        // // but have positive error and negative I term.   (Meaning we need to speed up.)
-        // if (error > 0.0 && _iTerm < 0.0)
-        // {
-        //     _iTerm = 0.0;
-        // }
+        // Reset the I term if we hit the minimum active control value
+        // but have positive error and negative I term.   (Meaning we need to speed up.)
+        if (error > 0.0 && _iTerm < 0.0)
+        {
+            _iTerm = 0.0;
+        }
     }
 
 
@@ -89,6 +98,10 @@ void PidController::Update(float setpoint, float processVariableValue, unsigned 
     _previousError = error;
 }
 
+float PidController::GetBTerm()
+{
+    return _bTerm;
+}
 
 float PidController::GetPTerm()
 {

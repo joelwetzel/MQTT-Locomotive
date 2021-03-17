@@ -22,6 +22,7 @@ class PidController
     unsigned long _previousMicros;
     float _previousError;
 
+    float _bTerm;
     float _pTerm;
     float _iTerm;
     float _dTerm;
@@ -33,6 +34,7 @@ public:
 
     void Update(float setpoint, float processVariableValue, unsigned long currentMicros);
 
+    float GetBTerm();
     float GetPTerm();
     float GetITerm();
     float GetDTerm();

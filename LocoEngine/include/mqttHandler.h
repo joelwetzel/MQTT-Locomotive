@@ -52,6 +52,7 @@ class MqttHandler
     float _lastSpeedPercent;
 
     float _lastPidControlValue;
+    float _lastPidBTerm;
     float _lastPidPTerm;
     float _lastPidITerm;
     float _lastPidDTerm;
