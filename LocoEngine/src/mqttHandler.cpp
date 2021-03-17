@@ -132,7 +132,7 @@ void MqttHandler::setup_wifi()
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  ArduinoOTA.setHostname("esp8266-"USER_DEVICE_NETWORK_ID"-OTA");
+  ArduinoOTA.setHostname("esp8266-"USER_DEVICE_NETWORK_ID"Engine-OTA");
   ArduinoOTA.onStart([]() {
     Serial.println("OTA Start");
   });
