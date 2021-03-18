@@ -6,7 +6,7 @@
 // 1.2
 #define P_FACTOR            0.4 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
 
-#define T_i                 100.0
+#define T_i                 60.0
 #define T_d                 0.012     
 
 #define I_FACTOR            P_FACTOR / T_i
