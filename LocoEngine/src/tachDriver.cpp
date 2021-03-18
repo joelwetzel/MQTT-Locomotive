@@ -89,11 +89,16 @@ void TachDriver::ProcessStep()
         }
     }
 
+    if (lastPulseDelta < 1)
+    {
+      lastPulseDelta = 1;
+    }
+
     float unfilteredRpm = 60.0 * 1000.0 * 1000.0 / (float)lastPulseDelta / NUM_MAGNETS;
 
     float rpmDelta = fabs(unfilteredRpm - rpm);
-    if (rpmDelta > 200
-        && numAnomalousReadings < 10)
+    if ((rpmDelta > MAX_NONANOMALOUS_JUMP && numAnomalousReadings < 10) ||
+         unfilteredRpm > MAX_SANE_RPM)
     {
       // Throw out anomalous readings
       numAnomalousReadings++;
