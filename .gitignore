@@ -10,3 +10,5 @@ LocoSounds/.vscode/c_cpp_properties.json
 LocoSounds/.vscode
 LocoEngine/.vscode/settings.json
 wifi.h
+LocoCLI/bin
+LocoCLI/obj
