@@ -341,6 +341,12 @@ void MqttHandler::ProcessStep()
         _lastBattery = battery;
     }
 
+    // Discovery protocol
+    if (_publishCounter%500 == 0)
+    {
+        _mqttClient.publish("locomotives/discovery", USER_DEVICE_NETWORK_ID);
+    }
+
     if (_publishCounter == 1500)
     {
         _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/engineStatus", "OK"); 
