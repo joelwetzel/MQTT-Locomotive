@@ -21,7 +21,10 @@
                 "publish",
                 "${workspaceFolder}/LocoCLI.csproj",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "/consoleloggerparameters:NoSummary",
+                "--runtime", "osx-x64",
+                "--output", "bin/release/netcoreapp3.1/publish",
+                "--self-contained"
             ],
             "problemMatcher": "$msCompile"
         },
