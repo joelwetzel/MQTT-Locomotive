@@ -109,6 +109,10 @@ void MqttHandler::Setup()
                 _desiredControlModelId = intPayload;
             }
         }
+        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset")
+        {
+            ESP.restart();
+        }
     });
 }
 
@@ -197,6 +201,7 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/setcontrolmodel");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset");
       } 
       else 
       {
@@ -232,6 +237,7 @@ void MqttHandler::republishCommands()
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn", _soundController.GetHorn());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke", _smokeDriver.GetSmokeDisabled());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/setcontrolmodel", _ptrControlModel->GetControlModelId());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset", 0);
 }
 
 

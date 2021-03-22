@@ -14,12 +14,22 @@ namespace LocoCLI
     {
     }
 
+
+    [Verb("reset", isDefault: false, HelpText = "Reset a locomotive.")]
+    public class ResetOptions
+    {
+        [Option('n', "number", HelpText = "Road number.  Ex: 1292", Required = true)]
+        public string RoadNumber { get; set; }
+    }
+
+
     [Verb("listen", isDefault: false, HelpText="Listen for updates from a locomotive.")]
     public class ListenOptions
     {
         [Option('n', "number", HelpText = "Road number.  Ex: 1292", Required = true)]
         public string RoadNumber { get; set; }
     }
+
 
     [Verb("send", isDefault: false, HelpText = "Send a command to a locomotive.")]
     public class SendOptions
@@ -40,6 +50,23 @@ namespace LocoCLI
     {
         static async Task<int> Main(string[] args)
         {
+            return await CommandLine.Parser.Default.ParseArguments<ScanOptions, ResetOptions, ListenOptions, SendOptions>(args)
+                    .MapResult<ScanOptions, ResetOptions, ListenOptions, SendOptions, Task<int>>(
+                        (ScanOptions opts) => RunScanAndReturnExitCode(opts),
+                        (ResetOptions opts) => RunResetAndReturnExitCode(opts),
+                        (ListenOptions opts) => RunListenAndReturnExitCode(opts),
+                        (SendOptions opts) => RunSendAndReturnExitCode(opts),
+                        erros => Task.FromResult(1)
+                    );
+        }
+
+
+        static async Task<int> RunScanAndReturnExitCode(ScanOptions opts)
+        {
+            Console.WriteLine("Connecting...");
+
+            var mqttFactory = new MqttFactory();
+            var mqttClient = mqttFactory.CreateMqttClient();
 
             var mqttOptions = new MqttClientOptionsBuilder()
                                 .WithClientId($"LocoCLI{Guid.NewGuid()}")
@@ -47,25 +74,9 @@ namespace LocoCLI
                                 .WithCleanSession()
                                 .Build();
 
-            return await CommandLine.Parser.Default.ParseArguments<ScanOptions, ListenOptions, SendOptions>(args)
-                    .MapResult<ScanOptions, ListenOptions, SendOptions, Task<int>>(
-                        (ScanOptions opts) => RunScanAndReturnExitCode(opts, mqttOptions),
-                        (ListenOptions opts) => RunListenAndReturnExitCode(opts),
-                        (SendOptions opts) => RunSendAndReturnExitCode(opts),
-                        erros => Task.FromResult(1)
-                    );
-        }
-
-        static async Task<int> RunScanAndReturnExitCode(ScanOptions opts, IMqttClientOptions mqttOptions)
-        {
-            Console.WriteLine("Scanning...");
-
-            var mqttFactory = new MqttFactory();
-            var mqttClient = mqttFactory.CreateMqttClient();
-
             mqttClient.UseConnectedHandler(async e =>
             {
-                Console.WriteLine($"Connected to MQTT.");
+                Console.WriteLine($"Connected to MQTT.  Scanning...");
 
                 await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("locomotives/discovery").Build());
             });
@@ -90,6 +101,52 @@ namespace LocoCLI
             return 0;
         }
 
+
+        static async Task<int> RunResetAndReturnExitCode(ResetOptions opts)
+        {
+            Console.WriteLine("Connecting...");
+
+            var mqttFactory = new MqttFactory();
+            var mqttClient = mqttFactory.CreateMqttClient();
+
+            var mqttOptions = new MqttClientOptionsBuilder()
+                                .WithClientId($"LocoCLI{Guid.NewGuid()}")
+                                .WithTcpServer("mqtt.local")
+                                .WithCleanSession()
+                                .Build();
+
+            bool finished = false;
+
+            mqttClient.UseConnectedHandler(async e =>
+            {
+                Console.WriteLine($"Connected to MQTT.");
+                Console.WriteLine("Sending reset...");
+
+                var message = new MqttApplicationMessageBuilder()
+                                    .WithTopic($"locomotives/{opts.RoadNumber}/commands/reset")
+                                    .WithPayload("1")
+                                    .Build();
+
+                await mqttClient.PublishAsync(message, CancellationToken.None);
+                finished = true;
+            });
+
+            mqttClient.UseDisconnectedHandler(e =>
+            {
+                Console.WriteLine($"Disconnected from MQTT: {e.Reason}");
+            });
+
+            await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
+
+            while (!finished)
+            {
+                await Task.Delay(10);
+            }
+
+            return 0;
+        }
+
+
         static async Task<int> RunListenAndReturnExitCode(ListenOptions opts)
         {
             Console.WriteLine($"Listening for {opts.RoadNumber}...");
@@ -101,13 +158,47 @@ namespace LocoCLI
             return 0;
         }
 
+
         static async Task<int> RunSendAndReturnExitCode(SendOptions opts)
         {
-            Console.WriteLine($"Sending: {opts.RoadNumber} : {opts.Command} : {opts.Value}");
+            Console.WriteLine("Connecting...");
 
-            await Task.Delay(2000);
+            var mqttFactory = new MqttFactory();
+            var mqttClient = mqttFactory.CreateMqttClient();
 
-            Console.WriteLine("Done.");
+            var mqttOptions = new MqttClientOptionsBuilder()
+                                .WithClientId($"LocoCLI{Guid.NewGuid()}")
+                                .WithTcpServer("mqtt.local")
+                                .WithCleanSession()
+                                .Build();
+
+            bool finished = false;
+
+            mqttClient.UseConnectedHandler(async e =>
+            {
+                Console.WriteLine($"Connected to MQTT.");
+                Console.WriteLine($"Sending: {opts.RoadNumber} : {opts.Command} : {opts.Value}");
+
+                var message = new MqttApplicationMessageBuilder()
+                                    .WithTopic($"locomotives/{opts.RoadNumber}/commands/{opts.Command}")
+                                    .WithPayload(opts.Value)
+                                    .Build();
+
+                await mqttClient.PublishAsync(message, CancellationToken.None);
+                finished = true;
+            });
+
+            mqttClient.UseDisconnectedHandler(e =>
+            {
+                Console.WriteLine($"Disconnected from MQTT: {e.Reason}");
+            });
+
+            await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
+
+            while (!finished)
+            {
+                await Task.Delay(10);
+            }
 
             return 0;
         }
