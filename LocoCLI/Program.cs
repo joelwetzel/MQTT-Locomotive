@@ -28,6 +28,9 @@ namespace LocoCLI
     {
         [Option('n', "number", HelpText = "Road number.  Ex: 1292", Required = true)]
         public string RoadNumber { get; set; }
+
+        [Option('a', "attribute", HelpText = "Attribute to listen for.", Required = true)]
+        public string Attribute { get; set; }
     }
 
 
@@ -149,11 +152,41 @@ namespace LocoCLI
 
         static async Task<int> RunListenAndReturnExitCode(ListenOptions opts)
         {
-            Console.WriteLine($"Listening for {opts.RoadNumber}...");
+            Console.WriteLine("Connecting...");
 
-            await Task.Delay(2000);
+            var mqttFactory = new MqttFactory();
+            var mqttClient = mqttFactory.CreateMqttClient();
 
-            Console.WriteLine("Done.");
+            var mqttOptions = new MqttClientOptionsBuilder()
+                                .WithClientId($"LocoCLI{Guid.NewGuid()}")
+                                .WithTcpServer("mqtt.local")
+                                .WithCleanSession()
+                                .Build();
+
+            mqttClient.UseConnectedHandler(async e =>
+            {
+                Console.WriteLine($"Connected to MQTT.");
+                Console.WriteLine($"Listening for: {opts.RoadNumber} : {opts.Attribute}");
+
+                await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic($"locomotives/{opts.RoadNumber}/attributes/{opts.Attribute}").Build());
+            });
+
+            mqttClient.UseDisconnectedHandler(e =>
+            {
+                Console.WriteLine($"Disconnected from MQTT: {e.Reason}");
+            });
+
+            mqttClient.UseApplicationMessageReceivedHandler(e =>
+            {
+                Console.WriteLine(Encoding.UTF8.GetString(e.ApplicationMessage.Payload));
+            });
+
+            await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
+
+            while (true)
+            {
+                await Task.Delay(10);
+            }
 
             return 0;
         }
