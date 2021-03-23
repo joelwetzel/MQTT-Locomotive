@@ -111,6 +111,12 @@ void MqttHandler::Setup()
         }
         else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset")
         {
+            // This is a little hacky, that the MqttHandler knows too much about how the motor handler works, but I want to make 100% sure that we stop
+            // the motors before we restart, so that the train doesn't run away.
+            digitalWrite(D1, LOW);
+            digitalWrite(D2, LOW);
+            delay(1000);
+
             ESP.restart();
         }
     });
