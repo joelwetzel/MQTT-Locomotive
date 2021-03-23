@@ -68,17 +68,22 @@ namespace LocoCLI
         {
             Console.WriteLine("Connecting...");
 
-            CancellationTokenSource cts = new CancellationTokenSource();
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
 
             var locoClient = new LocoClient();
 
-            locoClient.ConnectAndScanAsync(cts.Token);
+            locoClient.ScanResultFound += (sender, args) =>
+            {
+                Console.WriteLine($"Locomotive found: {args.RoadNumber}");
+            };
+
+            locoClient.ConnectAndScanAsync(tokenSource.Token);
 
             // Wait until a key is pressed and then exit.
             await Task.Factory.StartNew(() =>
             {
                 Console.ReadKey();
-                cts.Cancel();
+                tokenSource.Cancel();
             });
 
             await Task.Delay(100);

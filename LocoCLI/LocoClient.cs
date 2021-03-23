@@ -8,8 +8,21 @@ using MQTTnet.Client.Options;
 
 namespace LocoCLI
 {
+    public struct ScanResultArgs
+    {
+        public string RoadNumber { get; }
+
+        public ScanResultArgs(string roadNumber) : this()
+        {
+            this.RoadNumber = roadNumber;
+        }
+    }
+
+
     public class LocoClient
     {
+        public event EventHandler<ScanResultArgs> ScanResultFound;
+
         public async Task ConnectAndScanAsync(CancellationToken token)
         {
             bool disconnected = false;
@@ -25,7 +38,8 @@ namespace LocoCLI
 
             mqttClient.UseConnectedHandler(async e =>
             {
-                Console.WriteLine($"Connected to MQTT.  Scanning...");
+                Console.WriteLine($"Connected to MQTT.");
+                Console.WriteLine("Scanning...");
 
                 await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("locomotives/discovery").Build());
             });
@@ -37,7 +51,8 @@ namespace LocoCLI
 
             mqttClient.UseApplicationMessageReceivedHandler(e =>
             {
-                Console.WriteLine("Found locomotive: " + Encoding.UTF8.GetString(e.ApplicationMessage.Payload));
+                var args = new ScanResultArgs(Encoding.UTF8.GetString(e.ApplicationMessage.Payload));
+                ScanResultFound?.Invoke(this, args);
             });
 
             await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
