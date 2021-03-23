@@ -68,39 +68,20 @@ namespace LocoCLI
         {
             Console.WriteLine("Connecting...");
 
-            var mqttFactory = new MqttFactory();
-            var mqttClient = mqttFactory.CreateMqttClient();
+            CancellationTokenSource cts = new CancellationTokenSource();
 
-            var mqttOptions = new MqttClientOptionsBuilder()
-                                .WithClientId($"LocoCLI{Guid.NewGuid()}")
-                                .WithTcpServer("mqtt.local")
-                                .WithCleanSession()
-                                .Build();
+            var locoClient = new LocoClient();
 
-            mqttClient.UseConnectedHandler(async e =>
-            {
-                Console.WriteLine($"Connected to MQTT.  Scanning...");
-
-                await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic("locomotives/discovery").Build());
-            });
-
-            mqttClient.UseDisconnectedHandler(e =>
-            {
-                Console.WriteLine($"Disconnected from MQTT: {e.Reason}");
-            });
-
-            mqttClient.UseApplicationMessageReceivedHandler(e =>
-            {
-                Console.WriteLine("Found locomotive: " + Encoding.UTF8.GetString(e.ApplicationMessage.Payload));
-            });
-
-            await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
+            locoClient.ConnectAndScanAsync(cts.Token);
 
             // Wait until a key is pressed and then exit.
             await Task.Factory.StartNew(() =>
             {
                 Console.ReadKey();
+                cts.Cancel();
             });
+
+            await Task.Delay(100);
 
             return 0;
         }
