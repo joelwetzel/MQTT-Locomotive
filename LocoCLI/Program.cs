@@ -96,10 +96,11 @@ namespace LocoCLI
 
             await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
 
-            while (true)
+            // Wait until a key is pressed and then exit.
+            await Task.Factory.StartNew(() =>
             {
-                await Task.Delay(10);
-            }
+                Console.ReadKey();
+            });
 
             return 0;
         }
@@ -141,6 +142,7 @@ namespace LocoCLI
 
             await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
 
+            // Exit after the command is sent.
             while (!finished)
             {
                 await Task.Delay(10);
@@ -183,10 +185,11 @@ namespace LocoCLI
 
             await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
 
-            while (true)
+            // Wait until a key is pressed and then exit.
+            await Task.Factory.StartNew(() =>
             {
-                await Task.Delay(10);
-            }
+                Console.ReadKey();
+            });
 
             return 0;
         }
@@ -228,6 +231,7 @@ namespace LocoCLI
 
             await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
 
+            // Exit after the command is sent.
             while (!finished)
             {
                 await Task.Delay(10);
