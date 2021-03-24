@@ -66,11 +66,14 @@ namespace LocoCLI
 
         static async Task<int> RunScanAndReturnExitCode(ScanOptions opts)
         {
-            Console.WriteLine("Connecting...");
-
             CancellationTokenSource tokenSource = new CancellationTokenSource();
 
             var locoClient = new LocoClient();
+
+            locoClient.Log += (sender, args) =>
+            {
+                Console.WriteLine(args.Log);
+            };
 
             locoClient.ScanResultFound += (sender, args) =>
             {
@@ -94,45 +97,16 @@ namespace LocoCLI
 
         static async Task<int> RunResetAndReturnExitCode(ResetOptions opts)
         {
-            Console.WriteLine("Connecting...");
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
 
-            var mqttFactory = new MqttFactory();
-            var mqttClient = mqttFactory.CreateMqttClient();
+            var locoClient = new LocoClient();
 
-            var mqttOptions = new MqttClientOptionsBuilder()
-                                .WithClientId($"LocoCLI{Guid.NewGuid()}")
-                                .WithTcpServer("mqtt.local")
-                                .WithCleanSession()
-                                .Build();
-
-            bool finished = false;
-
-            mqttClient.UseConnectedHandler(async e =>
+            locoClient.Log += (sender, args) =>
             {
-                Console.WriteLine($"Connected to MQTT.");
-                Console.WriteLine("Sending reset...");
+                Console.WriteLine(args.Log);
+            };
 
-                var message = new MqttApplicationMessageBuilder()
-                                    .WithTopic($"locomotives/{opts.RoadNumber}/commands/reset")
-                                    .WithPayload("1")
-                                    .Build();
-
-                await mqttClient.PublishAsync(message, CancellationToken.None);
-                finished = true;
-            });
-
-            mqttClient.UseDisconnectedHandler(e =>
-            {
-                Console.WriteLine($"Disconnected from MQTT: {e.Reason}");
-            });
-
-            await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
-
-            // Exit after the command is sent.
-            while (!finished)
-            {
-                await Task.Delay(10);
-            }
+            await locoClient.ConnectAndSendResetAsync(opts.RoadNumber, tokenSource.Token);
 
             return 0;
         }
