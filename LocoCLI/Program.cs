@@ -114,42 +114,25 @@ namespace LocoCLI
 
         static async Task<int> RunListenAndReturnExitCode(ListenOptions opts)
         {
-            Console.WriteLine("Connecting...");
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
 
-            var mqttFactory = new MqttFactory();
-            var mqttClient = mqttFactory.CreateMqttClient();
+            var locoClient = new LocoClient();
 
-            var mqttOptions = new MqttClientOptionsBuilder()
-                                .WithClientId($"LocoCLI{Guid.NewGuid()}")
-                                .WithTcpServer("mqtt.local")
-                                .WithCleanSession()
-                                .Build();
-
-            mqttClient.UseConnectedHandler(async e =>
+            locoClient.Log += (sender, args) =>
             {
-                Console.WriteLine($"Connected to MQTT.");
-                Console.WriteLine($"Listening for: {opts.RoadNumber} : {opts.Attribute}");
+                Console.WriteLine(args.Log);
+            };
 
-                await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic($"locomotives/{opts.RoadNumber}/attributes/{opts.Attribute}").Build());
-            });
-
-            mqttClient.UseDisconnectedHandler(e =>
-            {
-                Console.WriteLine($"Disconnected from MQTT: {e.Reason}");
-            });
-
-            mqttClient.UseApplicationMessageReceivedHandler(e =>
-            {
-                Console.WriteLine(Encoding.UTF8.GetString(e.ApplicationMessage.Payload));
-            });
-
-            await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
+            locoClient.ConnectAndListenAsync(opts.RoadNumber, opts.Attribute, tokenSource.Token);
 
             // Wait until a key is pressed and then exit.
             await Task.Factory.StartNew(() =>
-            {
+            { 
                 Console.ReadKey();
+                tokenSource.Cancel();
             });
+
+            await Task.Delay(100);
 
             return 0;
         }
@@ -157,45 +140,16 @@ namespace LocoCLI
 
         static async Task<int> RunSendAndReturnExitCode(SendOptions opts)
         {
-            Console.WriteLine("Connecting...");
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
 
-            var mqttFactory = new MqttFactory();
-            var mqttClient = mqttFactory.CreateMqttClient();
+            var locoClient = new LocoClient();
 
-            var mqttOptions = new MqttClientOptionsBuilder()
-                                .WithClientId($"LocoCLI{Guid.NewGuid()}")
-                                .WithTcpServer("mqtt.local")
-                                .WithCleanSession()
-                                .Build();
-
-            bool finished = false;
-
-            mqttClient.UseConnectedHandler(async e =>
+            locoClient.Log += (sender, args) =>
             {
-                Console.WriteLine($"Connected to MQTT.");
-                Console.WriteLine($"Sending: {opts.RoadNumber} : {opts.Command} : {opts.Value}");
+                Console.WriteLine(args.Log);
+            };
 
-                var message = new MqttApplicationMessageBuilder()
-                                    .WithTopic($"locomotives/{opts.RoadNumber}/commands/{opts.Command}")
-                                    .WithPayload(opts.Value)
-                                    .Build();
-
-                await mqttClient.PublishAsync(message, CancellationToken.None);
-                finished = true;
-            });
-
-            mqttClient.UseDisconnectedHandler(e =>
-            {
-                Console.WriteLine($"Disconnected from MQTT: {e.Reason}");
-            });
-
-            await mqttClient.ConnectAsync(mqttOptions, CancellationToken.None);
-
-            // Exit after the command is sent.
-            while (!finished)
-            {
-                await Task.Delay(10);
-            }
+            await locoClient.ConnectAndSendCommandAsync(opts.RoadNumber, opts.Command, opts.Value, tokenSource.Token);
 
             return 0;
         }

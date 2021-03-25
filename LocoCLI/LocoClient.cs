@@ -35,6 +35,37 @@ namespace LocoCLI
         public event EventHandler<ScanResultArgs> ScanResultFound;
 
 
+        public async Task ConnectAndSendCommandAsync(string roadNumber, string command, string value, CancellationToken token)
+        {
+            Log?.Invoke(this, new LogArgs("Connecting..."));
+
+            var mqttFactory = new MqttFactory();
+            var mqttClient = mqttFactory.CreateMqttClient();
+
+            var mqttOptions = new MqttClientOptionsBuilder()
+                                .WithClientId($"LocoCLI{Guid.NewGuid()}")
+                                .WithTcpServer("mqtt.local")
+                                .WithCleanSession()
+                                .Build();
+
+            mqttClient.UseConnectedHandler(async e =>
+            {
+                Log?.Invoke(this, new LogArgs("Connected to MQTT."));
+                Log?.Invoke(this, new LogArgs($"Sending: {roadNumber}/commands/{command} : {value}"));
+
+                var message = new MqttApplicationMessageBuilder()
+                                .WithTopic($"locomotives/{roadNumber}/commands/{command}")
+                                .WithPayload(value)
+                                .Build();
+
+                await mqttClient.PublishAsync(message, token);
+                Log?.Invoke(this, new LogArgs("Command sent."));
+            });
+
+            await mqttClient.ConnectAsync(mqttOptions, token);
+        }
+
+
         public async Task ConnectAndSendResetAsync(string roadNumber, CancellationToken token)
         {
             Log?.Invoke(this, new LogArgs("Connecting..."));
@@ -63,6 +94,52 @@ namespace LocoCLI
             });
 
             await mqttClient.ConnectAsync(mqttOptions, token);
+        }
+
+
+        public async Task ConnectAndListenAsync(string roadNumber, string attribute, CancellationToken token)
+        {
+            Log?.Invoke(this, new LogArgs("Connecting..."));
+
+            bool disconnected = false;
+
+            var mqttFactory = new MqttFactory();
+            var mqttClient = mqttFactory.CreateMqttClient();
+
+            var mqttOptions = new MqttClientOptionsBuilder()
+                                .WithClientId($"LocoCLI{Guid.NewGuid()}")
+                                .WithTcpServer("mqtt.local")
+                                .WithCleanSession()
+                                .Build();
+
+            mqttClient.UseConnectedHandler(async e =>
+            {
+                Log?.Invoke(this, new LogArgs("Connected to MQTT."));
+                Log?.Invoke(this, new LogArgs($"Listening for: {roadNumber}/attributes/{attribute}"));
+
+                await mqttClient.SubscribeAsync(new MqttTopicFilterBuilder().WithTopic($"locomotives/{roadNumber}/attributes/{attribute}").Build());
+            });
+
+            mqttClient.UseDisconnectedHandler(e =>
+            {
+                disconnected = true;
+            });
+
+            mqttClient.UseApplicationMessageReceivedHandler(e =>
+            {
+                Log?.Invoke(this, new LogArgs(Encoding.UTF8.GetString(e.ApplicationMessage.Payload)));
+            });
+
+            await mqttClient.ConnectAsync(mqttOptions, token);
+
+            while (!token.IsCancellationRequested && !disconnected)
+            {
+                await Task.Delay(10);
+            }
+
+            Log?.Invoke(this, new LogArgs("Disconnecting..."));
+
+            await mqttClient.DisconnectAsync();
         }
 
 
