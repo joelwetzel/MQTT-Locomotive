@@ -7,7 +7,7 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client;
 using System.Text;
 
-namespace LocoCLI
+namespace LocoCLI.CommandLineOptions
 {
     [Verb("send", isDefault: false, HelpText = "Send a command to a locomotive.")]
     public class SendOptions

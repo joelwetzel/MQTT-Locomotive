@@ -7,7 +7,7 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client;
 using System.Text;
 
-namespace LocoCLI
+namespace LocoCLI.CommandLineOptions
 {
     [Verb("listen", isDefault: false, HelpText = "Listen for updates from a locomotive.")]
     public class ListenOptions

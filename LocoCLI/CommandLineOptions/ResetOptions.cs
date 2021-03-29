@@ -7,7 +7,7 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client;
 using System.Text;
 
-namespace LocoCLI
+namespace LocoCLI.CommandLineOptions
 {
     [Verb("reset", isDefault: false, HelpText = "Reset a locomotive.")]
     public class ResetOptions

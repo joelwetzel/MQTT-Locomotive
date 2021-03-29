@@ -7,6 +7,8 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client;
 using System.Text;
 
+using LocoCLI.CommandLineOptions;
+
 namespace LocoCLI
 {
     public class Program

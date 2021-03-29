@@ -7,7 +7,7 @@ using MQTTnet.Client.Options;
 using MQTTnet.Client;
 using System.Text;
 
-namespace LocoCLI
+namespace LocoCLI.CommandLineOptions
 {
     [Verb("scan", isDefault: false, HelpText = "Scan for active locomotives.")]
     public class ScanOptions
