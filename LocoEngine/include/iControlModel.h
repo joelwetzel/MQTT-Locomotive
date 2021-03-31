@@ -13,6 +13,7 @@ public:
 
     virtual float GetSpeedMph() = 0;
     virtual float GetSpeedPercent() = 0;
+
     virtual float GetEngineRpms() = 0;
     virtual float GetEnginePercent() = 0;
     virtual float GetSmokePercent() = 0;
@@ -26,6 +27,10 @@ public:
     virtual float GetBrake() = 0;
     virtual void SetReverser(int direction) = 0;
     virtual int GetReverser() = 0;
+
+    virtual void OverrideEngineRpms(float percent) = 0;
+    virtual void OverrideEnginePercent(float percent) = 0;
+    virtual void OverrideWheelRpms(float rpms) = 0;
 
     virtual void ProcessStep() = 0;
 };

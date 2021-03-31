@@ -110,6 +110,21 @@ int SimulatorControlModel::GetReverser()
     return _reverserDirection;
 }
 
+void SimulatorControlModel::OverrideEngineRpms(float rpms)
+{
+    // Do nothing
+}
+
+void SimulatorControlModel::OverrideEnginePercent(float percent)
+{
+    // Do nothing
+}
+
+void SimulatorControlModel::OverrideWheelRpms(float rpms)
+{
+    // Do nothing
+}
+
 
 void SimulatorControlModel::processEngineStep()
 {

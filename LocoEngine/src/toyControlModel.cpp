@@ -4,7 +4,7 @@ ToyControlModel::ToyControlModel(BatteryDriver &batteryDriver)
     : _batteryDriver(batteryDriver)
 {
     _throttle = 0.0;
-    _reverserDirection = 1;
+    _reverserDirection = 0;
 
     _enginePercent = 0.0;
     _smokePercent = 0.0;
@@ -96,6 +96,21 @@ void ToyControlModel::SetReverser(int direction)
 int ToyControlModel::GetReverser()
 {
     return _reverserDirection;
+}
+
+void ToyControlModel::OverrideEngineRpms(float rpms)
+{
+    // Do nothing
+}
+
+void ToyControlModel::OverrideEnginePercent(float percent)
+{
+    // Do nothing
+}
+
+void ToyControlModel::OverrideWheelRpms(float rpms)
+{
+    // Do nothing
 }
 
 

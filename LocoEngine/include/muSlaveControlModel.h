@@ -5,30 +5,32 @@
 
 #include "batteryDriver.h"
 
-#ifndef TOYCONTROLMODEL_H
-#define TOYCONTROLMODEL_H
+#ifndef MUSLAVECONTROLMODEL_H
+#define MUSLAVECONTROLMODEL_H
 
 
-class ToyControlModel : public IControlModel
+class MuSlaveControlModel : public IControlModel
 {
     BatteryDriver &_batteryDriver;
 
-    float _throttle;
     int _reverserDirection;
 
+    bool _engineOn;
+    float _engineRpms;
     float _enginePercent;
+    float _wheelRpms;
     float _speedPercent;
-    float _smokePercent;
 
     void clampSpeed();
 
 public:
-    ToyControlModel(BatteryDriver &batteryDriver);
-    ~ToyControlModel() { }
+    MuSlaveControlModel(BatteryDriver &batteryDriver);
+    ~MuSlaveControlModel() {}
 
     int GetControlModelId();
     
     float GetSpeedMph();
+
     float GetSpeedPercent();
 
     float GetEngineRpms();

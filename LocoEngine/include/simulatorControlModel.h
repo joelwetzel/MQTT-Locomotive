@@ -47,7 +47,9 @@ public:
     int GetControlModelId();
     
     float GetSpeedMph();
+
     float GetSpeedPercent();
+
     float GetEngineRpms();
     float GetEnginePercent();
     float GetSmokePercent();
@@ -61,6 +63,10 @@ public:
     float GetBrake();
     void SetReverser(int direction);
     int GetReverser();
+
+    void OverrideEngineRpms(float percent);
+    void OverrideEnginePercent(float percent);
+    void OverrideWheelRpms(float rpms);
 
     void ProcessStep();
 };

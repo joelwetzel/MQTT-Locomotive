@@ -11,7 +11,7 @@ MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlMode
     _lastReverser = 0;
     _lastSmokePercent = -1;
     _lastWheelRpms = 0.0;
-    _lastSpeedPercent = -1;
+    _lastSpeedMph = 0.0;
     _lastBell = false;
     _lastHorn = false;
     _lastBattery = 0.0;
@@ -25,6 +25,13 @@ MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlMode
     _publishCounter = 0;
 
     _desiredControlModelId = ptrControlModel->GetControlModelId();
+
+    _masterMasterSwitchTopic = String();
+    _masterEngineOnTopic = String();
+    _masterEngineRpmsTopic = String();
+    _masterEnginePercentTopic = String();
+    _masterWheelRpmTopic = String();
+    _masterReverserTopic = String();
 }
 
 
@@ -35,81 +42,116 @@ void MqttHandler::Setup()
 
     _mqttClient.setServer(mqtt_server, mqtt_port);
 
-    _mqttClient.setCallback([this](char* topic, byte* payload, unsigned int length) {
+    _mqttClient.setCallback([this](char* cstrTopic, byte* payload, unsigned int length) {
         Serial.print("Message arrived [");
 
-        char charPayload[50];
-        String newTopic = topic;
-        Serial.print(topic);
+        //char charPayload[50];
+        String strTopic = cstrTopic;
+        Serial.print(cstrTopic);
         Serial.print("] ");
         payload[length] = '\0';
-        String newPayload = String((char *)payload);
+        String strPayload = String((char *)payload);
 
-        float floatPayload = newPayload.toFloat();
-        int intPayload = newPayload.toInt();
+        float floatPayload = strPayload.toFloat();
+        int intPayload = strPayload.toInt();
 
-        Serial.println(newPayload);
+        Serial.println(strPayload);
         Serial.println();
-        newPayload.toCharArray(charPayload, newPayload.length() + 1);
+        //stringPayload.toCharArray(charPayload, stringPayload.length() + 1);
 
-        if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/throttle")
+        if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/throttle")
         {
             _ptrControlModel->SetThrottle(floatPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/throttle", floatPayload);
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/brake")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/brake")
         {
             _ptrControlModel->SetBrake(floatPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/brake", floatPayload);
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/reverser" ||
+                 strTopic == _masterReverserTopic)
         {
             _ptrControlModel->SetReverser(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/reverser", intPayload);
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights")
         {
             _lightingDriver.SetCabLights(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/cablights", _lightingDriver.GetCabLights());
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights")
         {
             _lightingDriver.SetHeadlights(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/headlights", _lightingDriver.GetHeadlights());
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell")
         {
             _soundController.SetBell(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", _soundController.GetBell());
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn")
         {
             _soundController.SetHorn(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", _soundController.GetHorn());
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/masterswitch" ||
+                 strTopic == _masterMasterSwitchTopic)
         {
             _batteryDriver.SetMasterSwitch(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", intPayload);
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon" ||
+                 strTopic == _masterEngineOnTopic)
         {
             _ptrControlModel->SetEngineOn(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", _ptrControlModel->GetEngineOn());
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke")
         {
             _smokeDriver.SetSmokeDisabled(intPayload);
             publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/disablesmoke", intPayload);
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/setcontrolmodel")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/setcontrolmodel")
         {
             if (intPayload == 1 || intPayload == 2)
             {
                 _desiredControlModelId = intPayload;
             }
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/lashup")
+        {
+            // Switch to slave control mode
+            _desiredControlModelId = 3;
+
+            // Subscribe to engine RPM, wheel RPM, and reverser from the master loco.
+            _masterMasterSwitchTopic = String("locomotives/") + strPayload + String("/attributes/masterswitch");
+            _masterEngineOnTopic = String("locomotives/") + strPayload + String("/attributes/engineon");
+            _masterEngineRpmsTopic = String("locomotives/") + strPayload + String("/attributes/enginerpms");
+            _masterEnginePercentTopic = String("locomotives/") + strPayload + String("/attributes/enginepercent");
+            _masterWheelRpmTopic = String("locomotives/") + strPayload + String("/attributes/commandedwheelrpms");
+            _masterReverserTopic = String("locomotives/") + strPayload + String("/attributes/reverser");
+
+            _mqttClient.subscribe(_masterMasterSwitchTopic.c_str());
+            _mqttClient.subscribe(_masterEngineOnTopic.c_str());
+            _mqttClient.subscribe(_masterEngineRpmsTopic.c_str());
+            _mqttClient.subscribe(_masterEnginePercentTopic.c_str());
+            _mqttClient.subscribe(_masterWheelRpmTopic.c_str());
+            _mqttClient.subscribe(_masterReverserTopic.c_str());
+        }
+        else if (strTopic == _masterEngineRpmsTopic)
+        {
+            _ptrControlModel->OverrideEngineRpms(floatPayload);
+        }
+        else if (strTopic == _masterEnginePercentTopic)
+        {
+            _ptrControlModel->OverrideEnginePercent(floatPayload);
+        }
+        else if (strTopic == _masterWheelRpmTopic)
+        {
+            _ptrControlModel->OverrideWheelRpms(floatPayload);
+        }
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset")
         {
             // This is a little hacky, that the MqttHandler knows too much about how the motor handler works, but I want to make 100% sure that we stop
             // the motors before we restart, so that the train doesn't run away.
@@ -207,6 +249,7 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/engineon");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/setcontrolmodel");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/lashup");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset");
       } 
       else 
@@ -243,6 +286,7 @@ void MqttHandler::republishCommands()
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn", _soundController.GetHorn());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke", _smokeDriver.GetSmokeDisabled());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/setcontrolmodel", _ptrControlModel->GetControlModelId());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/lashup", "-");
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset", 0);
 }
 
@@ -264,7 +308,7 @@ void MqttHandler::ProcessStep()
 {
     // Publish attributes to MQTT, if:
     //   - They have changed
-    //   - Or every 60 seconds
+    //   - Or every 30-60 seconds
 
 #ifdef PUBLISH_CONTROL_MODEL
     if (boot)
@@ -280,7 +324,7 @@ void MqttHandler::ProcessStep()
     }
 
     int reverser = _ptrControlModel->GetReverser();
-    if ((reverser != _lastReverser) || boot)
+    if ((reverser != _lastReverser) || boot || _publishCounter % 550 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/reverser", reverser);
         _lastReverser = reverser;
@@ -290,15 +334,16 @@ void MqttHandler::ProcessStep()
     if ((fabs(engineRpms - _lastEngineRpms) > 0.05 && _publishCounter % 47 == 0) || _publishCounter % 500 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms", engineRpms);
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginepercent", _ptrControlModel->GetEnginePercent());
         _lastEngineRpms = engineRpms;
     }
 
-    float speedPercent = _ptrControlModel->GetSpeedPercent();
-    if ((fabs(speedPercent - _lastSpeedPercent) > 0.01 && _publishCounter % 52 == 0) || _publishCounter % 504 == 0)
+    float speedMph = _ptrControlModel->GetSpeedMph();
+    if ((fabs(speedMph - _lastSpeedMph) > 0.01 && _publishCounter % 52 == 0) || _publishCounter % 504 == 0)
     {
-        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/speedpercent", speedPercent);
-        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/speedmph", _ptrControlModel->GetSpeedMph());
-        _lastSpeedPercent = speedPercent;
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/speedpercent", _ptrControlModel->GetSpeedPercent());
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/speedmph", speedMph);
+        _lastSpeedMph = speedMph;
     }
 
     float smokePercent = _ptrControlModel->GetSmokePercent();
@@ -309,15 +354,15 @@ void MqttHandler::ProcessStep()
     }
 #endif
 
-#ifdef PUBLISH_TACH
     float wheelRpms = _tachDriver.GetWheelRpm();
     if (_publishCounter%12 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/commandedwheelrpms", _ptrControlModel->GetEstimatedWheelRpms());
+#ifdef PUBLISH_TACH
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/measuredwheelrpms", wheelRpms);
+#endif
         _lastWheelRpms = wheelRpms;
     }
-#endif
 
 #ifdef PUBLISH_PID_CONTROLLER
     if (_publishCounter%23 == 0)
@@ -393,6 +438,12 @@ void MqttHandler::publish(const char *topic, int value)
     String tempStr = String(value);
     tempStr.toCharArray(charArray, tempStr.length() + 1);
     _mqttClient.publish(topic, charArray);
+}
+
+
+void MqttHandler::publish(const char *topic, const char *value)
+{
+    _mqttClient.publish(topic, value);
 }
 
 

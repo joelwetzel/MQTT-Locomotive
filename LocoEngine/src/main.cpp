@@ -8,6 +8,7 @@
 #include "iControlModel.h"
 #include "simulatorControlModel.h"
 #include "toyControlModel.h"
+#include "muSlaveControlModel.h"
 
 #include "pidController.h"
 #include "motorDriver.h"
@@ -33,10 +34,15 @@ IControlModel* ptrSimulatorControlModel(&refSimulatorControlModel);
 ToyControlModel refToyControlModel(batteryDriver);
 IControlModel* ptrToyControlModel(&refToyControlModel);
 
+MuSlaveControlModel refMuControlModel(batteryDriver);
+IControlModel *ptrMuControlModel(&refMuControlModel);
+
 #ifdef SIMULATOR_CONTROL_MODEL
 IControlModel* ptrControlModel = ptrSimulatorControlModel;
 #elif defined TOY_CONTROL_MODEL
 IControlModel* ptrControlModel = ptrToyControlModel;
+#elif defined MU_SLAVE_CONTROL_MODEL
+IControlModel* ptrControlModel = ptrMuControlModel;
 #endif
 
 PidController pidController;
@@ -112,7 +118,7 @@ void loop()
   mqttHandler.Loop();
 
   int desiredControlModelId = mqttHandler.GetDesiredControlModelId();
-  if (desiredControlModelId != ptrControlModel->GetControlModelId() && ptrControlModel->GetSpeedPercent() < 0.1)
+  if (desiredControlModelId != ptrControlModel->GetControlModelId() && ptrControlModel->GetSpeedMph() < 1)
   {
     if (desiredControlModelId == 1)
     {
@@ -121,6 +127,10 @@ void loop()
     else if (desiredControlModelId == 2)
     {
       changeControlModel(ptrToyControlModel);
+    }
+    else if (desiredControlModelId == 3)
+    {
+      changeControlModel(ptrMuControlModel);
     }
   }
 

@@ -13,13 +13,6 @@
     #define MOTORBACKWARD_PIN D2
 #endif
 
-// 560
-// 760
-
-// Values for 16384Hz pwm
-#define MIN_SPEED_PWM             575.0
-#define MAX_SPEED_PWM             660.0
-
 
 class MotorDriver
 {

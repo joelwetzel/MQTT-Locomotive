@@ -49,7 +49,7 @@ class MqttHandler
     int _lastReverser;
     float _lastSmokePercent;
     float _lastWheelRpms;
-    float _lastSpeedPercent;
+    float _lastSpeedMph;
 
     float _lastPidControlValue;
     float _lastPidBTerm;
@@ -65,11 +65,19 @@ class MqttHandler
 
     int _desiredControlModelId;
 
+    String _masterMasterSwitchTopic;
+    String _masterEngineOnTopic;
+    String _masterEngineRpmsTopic;
+    String _masterEnginePercentTopic;
+    String _masterWheelRpmTopic;
+    String _masterReverserTopic;
+
     void setup_wifi();
     void reconnect();
     void republishCommands();
     void publish(const char *topic, float value);
     void publish(const char *topic, int value);
+    void publish(const char *topic, const char *value);
 
 public:
     MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlModel, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver, TachDriver &tachDriver, PidController &pidController);

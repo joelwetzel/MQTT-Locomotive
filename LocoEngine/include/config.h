@@ -1,32 +1,27 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-//#define SIMULATOR_CONTROL_MODEL
-#define TOY_CONTROL_MODEL
+#define SIMULATOR_CONTROL_MODEL
+//#define TOY_CONTROL_MODEL
+//#define MU_SLAVE_CONTROL_MODEL
 
 //#define DIRECT_SPEED_CONTROL
 #define PID_SPEED_CONTROL
 
-//#define PUBLISH_CONTROL_MODEL
-#define PUBLISH_PID_CONTROLLER
+#define PUBLISH_CONTROL_MODEL
+//#define PUBLISH_PID_CONTROLLER
 #define PUBLISH_TACH
 //#define PUBLISH_SOUNDS
 
-#define SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE            4.77
-#define SPEEDPERCENT_TO_WHEEL_RPMS_INTERCEPT        96.0
 
 #define WHEEL_RPM_TO_MPH                0.1
 #define PHYSICS_DELTAT            15.0
 
-
-
-
+// Include file that contains WiFi credentials.  The #defines that need to be in it are:  WIFI_SSID, WIFI_PASSWORD
 #include "wifi.h"
+
 #define USER_MQTT_SERVER          "mqtt.local"
 #define USER_MQTT_PORT            1883
-
-
-#define USER_DEVICE_NETWORK_ID    "UP1292"
 
 
 #ifdef ARDUINO_ESP8266_NODEMCU
@@ -36,9 +31,11 @@
 #endif
 
 
-// RS-3 specific figures
-#define ENGINE_RPM_IDLE         315
-#define ENGINE_RPM_MAX          1000
+#define ALCO_RS3                1
+
+#if LOCO_TYPE == ALCO_RS3
+    #include "locoTypes/alco_rs3.h"
+#endif
 
 
 
