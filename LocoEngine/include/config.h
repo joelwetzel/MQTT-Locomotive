@@ -11,7 +11,7 @@
 #define PUBLISH_CONTROL_MODEL
 //#define PUBLISH_PID_CONTROLLER
 #define PUBLISH_TACH
-//#define PUBLISH_SOUNDS
+#define PUBLISH_SOUNDS
 
 
 #define WHEEL_RPM_TO_MPH                0.1

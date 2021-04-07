@@ -16,30 +16,31 @@ void MqttHandler::Setup()
 
     _mqttClient.setServer(mqtt_server, mqtt_port);
 
-    _mqttClient.setCallback([this](char* topic, byte* payload, unsigned int length) {
-        char charPayload[50];
-        String newTopic = topic;
+    _mqttClient.setCallback([this](char* cstrTopic, byte* payload, unsigned int length) {
+        String strTopic = cstrTopic;
         payload[length] = '\0';
-        String newPayload = String((char *)payload);
+        String strPayload = String((char *)payload);
 
-        float floatPayload = newPayload.toFloat();
-        int intPayload = newPayload.toInt();
+        float floatPayload = strPayload.toFloat();
+        int intPayload = strPayload.toInt();
 
-        //Serial.println(newPayload);
-
-        newPayload.toCharArray(charPayload, newPayload.length() + 1);
-
-        if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell")
+        if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell")
         {
             _audioDriver.SetBell(intPayload);
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn")
         {
             _audioDriver.SetHorn(intPayload);
         }
-        else if (newTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms")
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms")
         {
             _audioDriver.setEngineRpms(floatPayload);
+        }
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset")
+        {
+            delay(1000);
+
+            ESP.restart();
         }
     });
 }
@@ -120,6 +121,7 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset");
       } 
       else 
       {

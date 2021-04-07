@@ -1,9 +1,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define DELTAT            30.0
+#define DELTAT            15.0
 
+// Include file that contains WiFi credentials.  The #defines that need to be in it are:  WIFI_SSID, WIFI_PASSWORD
 #include "wifi.h"
+
 #define USER_MQTT_SERVER          "mqtt.local"
 #define USER_MQTT_PORT            1883
 
@@ -16,11 +18,14 @@
 #endif
 
 
-// RS-3 specific figures
-#define ENGINE_RPM_IDLE         315
-#define ENGINE_RPM_1            500
-#define ENGINE_RPM_2            700
-#define ENGINE_RPM_MAX          1000
+#define ALCO_RS3                1
+
+#if LOCO_TYPE == ALCO_RS3
+    #include "locoTypes/alco_rs3.h"
+#endif
+
+
+
 
 
 #endif

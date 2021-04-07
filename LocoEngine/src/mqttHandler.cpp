@@ -43,21 +43,12 @@ void MqttHandler::Setup()
     _mqttClient.setServer(mqtt_server, mqtt_port);
 
     _mqttClient.setCallback([this](char* cstrTopic, byte* payload, unsigned int length) {
-        Serial.print("Message arrived [");
-
-        //char charPayload[50];
         String strTopic = cstrTopic;
-        Serial.print(cstrTopic);
-        Serial.print("] ");
         payload[length] = '\0';
         String strPayload = String((char *)payload);
 
         float floatPayload = strPayload.toFloat();
         int intPayload = strPayload.toInt();
-
-        Serial.println(strPayload);
-        Serial.println();
-        //stringPayload.toCharArray(charPayload, stringPayload.length() + 1);
 
         if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/throttle")
         {
@@ -331,7 +322,7 @@ void MqttHandler::ProcessStep()
     }
 
     float engineRpms = _ptrControlModel->GetEngineRpms();
-    if ((fabs(engineRpms - _lastEngineRpms) > 0.05 && _publishCounter % 47 == 0) || _publishCounter % 500 == 0)
+    if ((fabs(engineRpms - _lastEngineRpms) > 0.05 && _publishCounter % 47 == 0) || _publishCounter % 143 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms", engineRpms);
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginepercent", _ptrControlModel->GetEnginePercent());

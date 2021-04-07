@@ -52,9 +52,9 @@ void AudioDriver::Setup()
   // Gain is set by engine RPMs
   wavs[ENGINE_CHANNEL] = new AudioGeneratorWAV();
 
-  // Use channel 1 for the periodic horn sound.
+  // Use channel 1 for the horn sound.
   stubs[HORN_CHANNEL] = mixer->NewInput();
-  stubs[HORN_CHANNEL]->SetGain(1.0);        // 0.8 when running on desktop
+  stubs[HORN_CHANNEL]->SetGain(0.8);        // 0.8 when running on desktop
   wavs[HORN_CHANNEL] = new AudioGeneratorWAV();
 
   // Use channel 2 for the bell sound
@@ -82,7 +82,7 @@ void AudioDriver::Loop()
     if (enginePercent > 100.0)
     { enginePercent = 100.0; }
 
-    float engine_gain = ((enginePercent / 100.0) * 0.8) + 0.3;
+    float engine_gain = ((enginePercent / 100.0) * 0.6) + 0.3;
     if (engine_gain > 1.0) {
         engine_gain = 1.0;
     }
