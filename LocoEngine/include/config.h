@@ -14,7 +14,7 @@
 #define PUBLISH_SOUNDS
 
 
-#define WHEEL_RPM_TO_MPH                0.1
+#define WHEEL_RPM_TO_SCALE_MPH                0.135
 #define PHYSICS_DELTAT            15.0
 
 // Include file that contains WiFi credentials.  The #defines that need to be in it are:  WIFI_SSID, WIFI_PASSWORD

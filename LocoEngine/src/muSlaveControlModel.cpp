@@ -21,7 +21,7 @@ int MuSlaveControlModel::GetControlModelId()
 
 float MuSlaveControlModel::GetSpeedMph()
 {
-    return GetEstimatedWheelRpms() * WHEEL_RPM_TO_MPH;
+    return GetEstimatedWheelRpms() * WHEEL_RPM_TO_SCALE_MPH;
 }
 
 float MuSlaveControlModel::GetSpeedPercent()

@@ -25,7 +25,7 @@ int SimulatorControlModel::GetControlModelId()
 
 float SimulatorControlModel::GetSpeedMph()
 {
-    return fabs(GetEstimatedWheelRpms() * WHEEL_RPM_TO_MPH);
+    return fabs(GetEstimatedWheelRpms() * WHEEL_RPM_TO_SCALE_MPH);
 }
 
 float SimulatorControlModel::GetSpeedPercent()

@@ -21,7 +21,7 @@ int ToyControlModel::GetControlModelId()
 
 float ToyControlModel::GetSpeedMph()
 {
-    return GetEstimatedWheelRpms() * WHEEL_RPM_TO_MPH;
+    return GetEstimatedWheelRpms() * WHEEL_RPM_TO_SCALE_MPH;
 }
 
 float ToyControlModel::GetSpeedPercent()
@@ -46,7 +46,7 @@ float ToyControlModel::GetSmokePercent()
 
 float ToyControlModel::GetEstimatedWheelRpms()
 {
-    if (_speedPercent > 0.1)
+    if (_speedPercent > 0.1 && _reverserDirection != 0)
     {
         return _speedPercent * SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE + SPEEDPERCENT_TO_WHEEL_RPMS_INTERCEPT;
     }
@@ -137,7 +137,13 @@ void ToyControlModel::ProcessStep()
 {
     _enginePercent = _throttle;
     _speedPercent = _throttle;
-    _smokePercent = _throttle;
+
+    _smokePercent = _throttle * 3.0;
+    if (_smokePercent > 100.0)
+    {
+        _smokePercent = 100.0;
+    }
+
     _directionOfTravel = _reverserDirection;
 
     clampSpeed();
