@@ -27,6 +27,7 @@ public:
     virtual float GetBrake() = 0;
     virtual void SetReverser(int direction) = 0;
     virtual int GetReverser() = 0;
+    virtual int GetDirectionOfTravel() = 0;
 
     virtual void OverrideEngineRpms(float percent) = 0;
     virtual void OverrideEnginePercent(float percent) = 0;

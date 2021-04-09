@@ -70,13 +70,13 @@ void processStep()
   ptrControlModel->ProcessStep();
 
 #ifdef DIRECT_SPEED_CONTROL
-  motorDriver.SetMotorSpeed(ptrControlModel->GetSpeedPercent());
+  motorDriver.SetMotorSpeed(ptrControlModel->GetSpeedPercent() * ptrControlModel->GetDirectionOfTravel());
 #elif defined PID_SPEED_CONTROL
   float desiredWheelRpms = ptrControlModel->GetEstimatedWheelRpms();
   float measuredWheelRpms = tachDriver.GetWheelRpm();
   pidController.Update(desiredWheelRpms, measuredWheelRpms, micros());
   float controlledMotorPercent = pidController.GetControlValue();
-  motorDriver.SetMotorSpeed(controlledMotorPercent);
+  motorDriver.SetMotorSpeed(controlledMotorPercent * ptrControlModel->GetDirectionOfTravel());
 #endif
 
   smokeDriver.SetSmokePercent(ptrControlModel->GetSmokePercent());

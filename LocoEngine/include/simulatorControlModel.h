@@ -9,11 +9,8 @@
 #define SIMULATORCONTROLMODEL_H
 
 
-#define ENGINE_SPINUP                       0.01
 #define ROLLING_RESISTANCE_FACTOR           0.0012
 #define AIR_RESISTANCE_FACTOR               0.0000012
-#define BRAKING_FACTOR                      0.0001
-#define ENGINE_POWER                        0.0000017
 
 #define SMOKE_OVERTHROTTLE_FACTOR           1.5
 #define SMOKE_ENGINE_WORK_FACTOR            7.0
@@ -27,6 +24,7 @@ class SimulatorControlModel : public IControlModel
     float _throttle;
     float _brake;
     int _reverserDirection;
+    int _directionOfTravel;
 
     float _enginePercent;
     float _smokePercent;
@@ -63,6 +61,7 @@ public:
     float GetBrake();
     void SetReverser(int direction);
     int GetReverser();
+    int GetDirectionOfTravel();
 
     void OverrideEngineRpms(float percent);
     void OverrideEnginePercent(float percent);

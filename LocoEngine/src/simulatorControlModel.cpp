@@ -7,6 +7,7 @@ SimulatorControlModel::SimulatorControlModel(BatteryDriver &batteryDriver)
     _throttle = 0.0;
     _brake = 0.0;
     _reverserDirection = 0;
+    _directionOfTravel = 0;
 
     _enginePercent = 0.0;
     _smokePercent = 0.0;
@@ -58,7 +59,7 @@ float SimulatorControlModel::GetSmokePercent()
 
 float SimulatorControlModel::GetEstimatedWheelRpms()
 {
-    if (_speedPercent > 0.1)
+    if (_speedPercent > 0.02)
     {
         return _speedPercent * SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE + SPEEDPERCENT_TO_WHEEL_RPMS_INTERCEPT;
     }
@@ -108,6 +109,11 @@ void SimulatorControlModel::SetReverser(int direction)
 int SimulatorControlModel::GetReverser()
 {
     return _reverserDirection;
+}
+
+int SimulatorControlModel::GetDirectionOfTravel()
+{
+    return _directionOfTravel;
 }
 
 void SimulatorControlModel::OverrideEngineRpms(float rpms)
@@ -191,27 +197,24 @@ void SimulatorControlModel::processResistanceStep()
             _speedPercent = 0.0;
         }
     }
-    else if (_speedPercent < 0.0)
-    {
-        _speedPercent += resistance * PHYSICS_DELTAT;
-
-        if (_speedPercent > 0.0)       // Resistance can't change the direction of travel
-        {
-            _speedPercent = 0.0;
-        }
-    }
 }
 
 
 void SimulatorControlModel::processReverserStep()
 {
+    // Must come to a complete stop to change direction of travel.
+    if (_speedPercent < 0.01)
+    {
+        _directionOfTravel = _reverserDirection;
+    }
+
     // Apply engine power through reverser
     if (_batteryDriver.GetMasterSwitch() == true)
     {
-        if (_enginePercent > 0.0 &&
-                (_speedPercent * _reverserDirection > 0 || fabs(_speedPercent) < 0.5))    // The transmission only allows power to be applied if the reverser is in same direction of travel.
+        // The transmission only allows power to be applied if the reverser is in same direction of travel.
+        if (_enginePercent > 0.0 && _reverserDirection == _directionOfTravel)
         {
-            _speedPercent += _reverserDirection * sqrt(ENGINE_POWER * _enginePercent) * PHYSICS_DELTAT;
+            _speedPercent += sqrt(ENGINE_POWER * _enginePercent) * PHYSICS_DELTAT;            
         }
     }
 }
@@ -223,9 +226,9 @@ void SimulatorControlModel::clampSpeed()
     {
         _speedPercent = 100.0;
     }
-    else if (_speedPercent < -100.0)
+    else if (_speedPercent < 0.0)
     {
-        _speedPercent = -100.0;
+        _speedPercent = 0.0;
     }
 }
 

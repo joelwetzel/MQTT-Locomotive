@@ -46,6 +46,7 @@ public:
     float GetBrake();
     void SetReverser(int direction);
     int GetReverser();
+    int GetDirectionOfTravel();
 
     void OverrideEngineRpms(float percent);
     void OverrideEnginePercent(float percent);

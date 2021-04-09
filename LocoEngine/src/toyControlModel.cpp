@@ -5,6 +5,7 @@ ToyControlModel::ToyControlModel(BatteryDriver &batteryDriver)
 {
     _throttle = 0.0;
     _reverserDirection = 0;
+    _directionOfTravel = 0;
 
     _enginePercent = 0.0;
     _smokePercent = 0.0;
@@ -98,6 +99,11 @@ int ToyControlModel::GetReverser()
     return _reverserDirection;
 }
 
+int ToyControlModel::GetDirectionOfTravel()
+{
+    return _directionOfTravel;
+}
+
 void ToyControlModel::OverrideEngineRpms(float rpms)
 {
     // Do nothing
@@ -120,9 +126,9 @@ void ToyControlModel::clampSpeed()
     {
         _speedPercent = 100.0;
     }
-    else if (_speedPercent < -100.0)
+    else if (_speedPercent < 0.0)
     {
-        _speedPercent = -100.0;
+        _speedPercent = 0.0;
     }
 }
 
@@ -130,8 +136,9 @@ void ToyControlModel::clampSpeed()
 void ToyControlModel::ProcessStep()
 {
     _enginePercent = _throttle;
-    _speedPercent = _enginePercent * _reverserDirection;
-    _smokePercent = _enginePercent;
+    _speedPercent = _throttle;
+    _smokePercent = _throttle;
+    _directionOfTravel = _reverserDirection;
 
     clampSpeed();
 }

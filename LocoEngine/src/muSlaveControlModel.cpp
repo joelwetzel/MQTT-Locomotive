@@ -90,6 +90,11 @@ int MuSlaveControlModel::GetReverser()
     return _reverserDirection;
 }
 
+int MuSlaveControlModel::GetDirectionOfTravel()
+{
+    return 0;
+}
+
 void MuSlaveControlModel::OverrideEngineRpms(float rpms)
 {
     _engineRpms = rpms;
