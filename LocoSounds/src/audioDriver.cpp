@@ -82,7 +82,7 @@ void AudioDriver::Loop()
     if (enginePercent > 100.0)
     { enginePercent = 100.0; }
 
-    float engine_gain = ((enginePercent / 100.0) * 0.6) + 0.3;
+    float engine_gain = ((enginePercent / 100.0) * 0.7) + 0.2;
     if (engine_gain > 1.0) {
         engine_gain = 1.0;
     }
