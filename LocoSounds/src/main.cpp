@@ -23,7 +23,7 @@ void timerStep()
 
 
 void setup() {
-  //Serial.begin(9600);
+  Serial.begin(9600);
 
   delay(1000);
   LittleFS.begin();

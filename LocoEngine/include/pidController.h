@@ -4,9 +4,9 @@
 #define PIDCONTROLLER_H
 
 // 1.2
-#define P_FACTOR            0.4 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
+#define P_FACTOR            0.74 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
 
-#define T_i                 60.0
+#define T_i                 78.0
 #define T_d                 0.012     
 
 #define I_FACTOR            P_FACTOR / T_i
@@ -14,7 +14,7 @@
 
 #define MAX_I_TERM          70.0
 #define MIN_I_TERM          -70.0
-#define MIN_ACTIVE_CONTROL_VALUE    1.0
+#define MIN_ACTIVE_CONTROL_VALUE    0.1
 
 class PidController
 {
