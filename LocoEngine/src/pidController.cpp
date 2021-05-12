@@ -26,6 +26,8 @@ void PidController::Update(float setpoint, float processVariableValue, unsigned 
         _hasBeenInitialized = true;
     }
 
+    // Units of setpoint and processVariableValue are wheel RPMs.
+    // Units of controlValue are motorPercent.
     float error = setpoint - processVariableValue;
     unsigned long dt = currentMicros - _previousMicros;
 

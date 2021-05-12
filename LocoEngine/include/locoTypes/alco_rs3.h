@@ -28,6 +28,14 @@
 #define SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE            4.77
 #define SPEEDPERCENT_TO_WHEEL_RPMS_INTERCEPT        96.0
 
-
+// ****************************************************************
+// * PID Controller configuration
+// ****************************************************************
+#define P_FACTOR            0.54 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
+#define I_FACTOR            0.0148 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
+#define D_FACTOR            0.0
+#define MAX_I_TERM          70.0
+#define MIN_I_TERM          -70.0
+#define MIN_ACTIVE_CONTROL_VALUE    0.3
 
 #endif

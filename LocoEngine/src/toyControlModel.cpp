@@ -138,7 +138,7 @@ void ToyControlModel::ProcessStep()
     _enginePercent = _throttle;
     _speedPercent = _throttle;
 
-    _smokePercent = _throttle * 3.0;
+    _smokePercent = _throttle * 4.0;
     if (_smokePercent > 100.0)
     {
         _smokePercent = 100.0;
