@@ -26,6 +26,8 @@ class MqttHandler
     bool _boot;
     int _publishCounter;
 
+    bool _disableSounds;
+
     void setup_wifi();
     void reconnect();
     void publish(const char *topic, float value);
@@ -37,7 +39,8 @@ public:
     void Setup();
     void Loop();
     void ProcessStep();
-};
 
+    bool GetDisableSounds();
+};
 
 #endif

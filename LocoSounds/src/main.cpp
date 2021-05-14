@@ -44,5 +44,9 @@ void setup() {
 void loop() {
   timer.run();
   mqttHandler.Loop();
-  audioDriver.Loop();
+
+  if (!mqttHandler.GetDisableSounds())
+  {
+    audioDriver.Loop();
+  }
 }

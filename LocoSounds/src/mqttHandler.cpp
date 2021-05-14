@@ -6,6 +6,14 @@ MqttHandler::MqttHandler(PubSubClient &mqttClient, AudioDriver &audioDriver)
 {
     _boot = true;
     _publishCounter = 0;
+
+    _disableSounds = false;
+}
+
+
+bool MqttHandler::GetDisableSounds()
+{
+  return _disableSounds;
 }
 
 
@@ -35,6 +43,10 @@ void MqttHandler::Setup()
         else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms")
         {
             _audioDriver.setEngineRpms(floatPayload);
+        }
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesounds")
+        {
+            _disableSounds = intPayload;
         }
         else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset")
         {
@@ -121,6 +133,7 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/enginerpms");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesounds");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset");
       } 
       else 

@@ -276,6 +276,7 @@ void MqttHandler::republishCommands()
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell", _soundController.GetBell());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn", _soundController.GetHorn());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesmoke", _smokeDriver.GetSmokeDisabled());
+    publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/disablesounds", 0);
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/setcontrolmodel", _ptrControlModel->GetControlModelId());
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/lashup", "-");
     publish("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset", 0);
