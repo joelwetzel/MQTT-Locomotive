@@ -31,8 +31,8 @@
 // ****************************************************************
 // * PID Controller configuration
 // ****************************************************************
-#define P_FACTOR            0.54 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
-#define I_FACTOR            0.0148 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
+#define P_FACTOR            1.04 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
+#define I_FACTOR            0.010 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
 #define D_FACTOR            0.0
 #define MAX_I_TERM          70.0
 #define MIN_I_TERM          -70.0
