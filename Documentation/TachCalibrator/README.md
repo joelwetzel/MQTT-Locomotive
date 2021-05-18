@@ -1,1 +1,1 @@
-![Fritzing diagram of Tach Calibrator](/Documentation/TachCalibrator/TachCalibratorFritzing.png)
+![Fritzing diagram of Tach Calibrator](TachCalibratorFritzing.png)
