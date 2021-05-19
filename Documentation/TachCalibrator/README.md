@@ -6,6 +6,7 @@ This board is a tool for testing and calibrating a Lionel truck with the Hall Ef
 
 ![Photo of protoboard with Wemos D1 Mini](TachCalibratorWemos.png)
 
+![Photo of the Hall Effect sensor and magnets in the truck](HallSensorAndMagnets.png)
 
 **Testing out my homemade tach on a powered Lionel truck:**
 
