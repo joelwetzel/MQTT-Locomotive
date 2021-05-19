@@ -12,10 +12,6 @@
 #define ROLLING_RESISTANCE_FACTOR           0.0012
 #define AIR_RESISTANCE_FACTOR               0.0000012
 
-#define SMOKE_OVERTHROTTLE_FACTOR           1.5
-#define SMOKE_ENGINE_WORK_FACTOR            11.0
-#define SMOKE_ACCELERATION_FACTOR           700.0
-
 class SimulatorControlModel : public IControlModel
 {
     BatteryDriver &_batteryDriver;

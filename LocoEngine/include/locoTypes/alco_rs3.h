@@ -2,6 +2,13 @@
 #define ALCO_RS3_H
 
 
+// ****************************************************************
+// * Smoke configuration
+// ****************************************************************
+#define SMOKE_OVERTHROTTLE_FACTOR           2.5
+#define SMOKE_ENGINE_WORK_FACTOR            13.0
+#define SMOKE_ACCELERATION_FACTOR           800.0
+
 
 // ****************************************************************
 // * MotorDriver configuration - Values are for 16384Hz PWM
@@ -17,7 +24,7 @@
 #define ENGINE_RPM_MAX          1000
 
 #define ENGINE_SPINUP                       0.01
-#define ENGINE_POWER                        0.00000034
+#define ENGINE_POWER                        0.00000018
 #define BRAKING_FACTOR                      0.0001
 
 
