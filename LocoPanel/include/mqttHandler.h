@@ -5,17 +5,19 @@
 
 #include "config.h"
 
+#include "locoList.h"
+#include "locoDisplayController.h"
+
 #ifndef MQTTHANDLER_H
 #define MQTTHANDLER_H
-
 
 
 class MqttHandler
 {
     PubSubClient &_mqttClient;
 
-    //LightingDriver &_lightingDriver;
-
+    LocoList &_locoList;
+    LocoDisplayController &_locoDisplayController;
 
     const char* ssid = WIFI_SSID; 
     const char* password = WIFI_PASSWORD;
@@ -40,20 +42,14 @@ class MqttHandler
     void publish(const char *topic, int value);
     void publish(const char *topic, const char *value);
 
+    void subscribeToLoco(String roadName);
+
 public:
-//    MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlModel, LightingDriver &lightingDriver, SoundController &soundController, BatteryDriver &batteryDriver, SmokeDriver &smokeDriver, TachDriver &tachDriver, PidController &pidController);
-    MqttHandler(PubSubClient &mqttClient);
+    MqttHandler(PubSubClient &mqttClient, LocoList &locoList, LocoDisplayController &locoDisplayController);
 
     void Setup();
     void Loop();
     void ProcessStep();
 };
-
-
-
-
-
-
-
 
 #endif

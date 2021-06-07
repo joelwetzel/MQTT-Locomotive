@@ -11,6 +11,9 @@
 #include "config.h"
 
 #include "mqttHandler.h"
+#include "locoList.h"
+#include "locoDisplayController.h"
+#include "nextLocoButtonController.h"
 
 /*****************  START GLOBALS SECTION ***********************************/
 
@@ -18,11 +21,34 @@ WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 SimpleTimer timer;
 
+Adafruit_SSD1306 locoDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-//MqttHandler mqttHandler(mqttClient, ptrControlModel, lightingDriver, soundController, batteryDriver, smokeDriver, tachDriver, pidController);
-MqttHandler mqttHandler(mqttClient);
+LocoList locoList;
+LocoDisplayController locoDisplayController(locoList, locoDisplay);
+NextLocoButtonController nextLocoButtonController(locoDisplayController);
+MqttHandler mqttHandler(mqttClient, locoList, locoDisplayController);
+
 
 /*****************  END GLOBALS SECTION ***********************************/
+
+
+void print(int index)
+{
+  Serial.printf("List starting at index %d\n", index);
+
+  std::vector<String> orderedList = locoList.GetListStartingAtIndex(index);
+  for (int i = 0; i < orderedList.size(); i++)
+  {
+    Serial.printf((orderedList[i] + "\n").c_str());
+  }
+}
+
+
+void processStep()
+{
+  nextLocoButtonController.ProcessStep();
+  locoDisplayController.ProcessStep();
+}
 
 
 void setup() {
@@ -30,14 +56,16 @@ void setup() {
 
   pinMode(MQTT_CONNECTED_PIN, OUTPUT);
 
-  // Flash the LED for just a moment before trying to connect to MQTT.  The LED will come back on permanently when connected.
-  pinMode(MQTT_CONNECTED_PIN, 0);
-  delay(500);
-  pinMode(MQTT_CONNECTED_PIN, 1);
+  locoDisplayController.Setup();    // Do this before mqttHandler.Setup(), so that it displays the loading screen while connecting to wifi.
 
   mqttHandler.Setup();
+  nextLocoButtonController.Setup();
+
+  timer.setInterval(30, processStep);
 }
+
 
 void loop() {
   mqttHandler.Loop();
+  timer.run();
 }

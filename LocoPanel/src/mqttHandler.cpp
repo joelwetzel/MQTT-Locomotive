@@ -1,39 +1,48 @@
 #include "mqttHandler.h"
 
 
-MqttHandler::MqttHandler(PubSubClient &mqttClient)
-    : _mqttClient(mqttClient)
+MqttHandler::MqttHandler(PubSubClient &mqttClient, LocoList &locoList, LocoDisplayController &locoDisplayController)
+    : _mqttClient(mqttClient), _locoList(locoList), _locoDisplayController(locoDisplayController)
 {
-    // _lastEngineOn = false;
-    // _lastEngineRpms = -1;
-    // _lastReverser = 0;
-
     _publishCounter = 0;
+}
 
-//    _masterMasterSwitchTopic = String();
+
+void MqttHandler::subscribeToLoco(String roadName)
+{
+  _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/masterswitch").c_str());
 }
 
 
 void MqttHandler::Setup()
 {
-    WiFi.mode(WIFI_STA);
-    setup_wifi();
+  _locoDisplayController.HandleDisconnected();
 
-    _mqttClient.setServer(mqtt_server, mqtt_port);
+  WiFi.mode(WIFI_STA);
+  setup_wifi();
 
-    _mqttClient.setCallback([this](char* cstrTopic, byte* payload, unsigned int length) {
-        String strTopic = cstrTopic;
-        payload[length] = '\0';
-        String strPayload = String((char *)payload);
+  _mqttClient.setServer(mqtt_server, mqtt_port);
 
-        float floatPayload = strPayload.toFloat();
-        int intPayload = strPayload.toInt();
+  _mqttClient.setCallback([this](char *cstrTopic, byte *payload, unsigned int length)
+  {
+    String strTopic = cstrTopic;
+    payload[length] = '\0';
+    String strPayload = String((char *)payload);
 
-        if (strTopic == "locomotives/discovery")
-        {
-            Serial.println("Discovered locomotive: " + strPayload);
-        }
-    });
+    float floatPayload = strPayload.toFloat();
+    int intPayload = strPayload.toInt();
+
+    if (strTopic == "locomotives/discovery")
+    {
+      //Serial.println("Discovered locomotive: " + strPayload);
+      _locoList.AddLoco(strPayload);
+      subscribeToLoco(strPayload);
+    }
+    else if (strTopic.endsWith("/masterswitch"))
+    {
+      Serial.printf(strPayload.c_str());
+    }
+  });
 }
 
 
@@ -94,6 +103,8 @@ void MqttHandler::reconnect()
       {
         Serial.println("connected");
 
+        _locoDisplayController.HandleConnectedToMqtt();
+
         digitalWrite(MQTT_CONNECTED_PIN, 0);
 
         if (boot)
@@ -135,8 +146,9 @@ void MqttHandler::Loop()
 {
     if (!_mqttClient.connected()) 
     {
-        digitalWrite(MQTT_CONNECTED_PIN, 1);
-        reconnect();
+      _locoDisplayController.HandleDisconnected();
+      digitalWrite(MQTT_CONNECTED_PIN, 1);
+      reconnect();
     }
 
     _mqttClient.loop();
