@@ -1,5 +1,7 @@
 #include "mqttHandler.h"
 
+#include <Regexp.h>
+
 
 MqttHandler::MqttHandler(PubSubClient &mqttClient, LocoList &locoList, LocoDisplayController &locoDisplayController)
     : _mqttClient(mqttClient), _locoList(locoList), _locoDisplayController(locoDisplayController)
@@ -32,6 +34,9 @@ void MqttHandler::Setup()
     float floatPayload = strPayload.toFloat();
     int intPayload = strPayload.toInt();
 
+    //Serial.printf(("Received message: " + strTopic + "\n").c_str());
+    //Serial.printf(("Payload: " + strPayload + "\n").c_str());
+
     if (strTopic == "locomotives/discovery")
     {
       //Serial.println("Discovered locomotive: " + strPayload);
@@ -40,7 +45,22 @@ void MqttHandler::Setup()
     }
     else if (strTopic.endsWith("/masterswitch"))
     {
-      Serial.printf(strPayload.c_str());
+      MatchState ms;
+      ms.Target((char*)strTopic.c_str());
+
+      char result = ms.Match("locomotives\/([a-zA-Z0-9]+)\/attributes\/masterswitch\0", 0);
+      //char result = ms.Match("attributes\/masterswitch", 0);
+
+      if (result == REGEXP_MATCHED && ms.level == 1)    // Matched and one captured match.
+      {
+        char buf [100];
+        char *roadName = ms.GetCapture(buf, 0);
+        int masterSwitch = intPayload;
+
+        Serial.printf("Roadname: ");
+        Serial.printf(roadName);
+        Serial.printf("\n");
+      }
     }
   });
 }

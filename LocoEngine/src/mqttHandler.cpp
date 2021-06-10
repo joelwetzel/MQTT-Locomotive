@@ -303,7 +303,7 @@ void MqttHandler::ProcessStep()
     //   - Or every 30-60 seconds
 
 #ifdef PUBLISH_CONTROL_MODEL
-    if (boot)
+    if (boot || _publishCounter % 456 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", _batteryDriver.GetMasterSwitch());
     }

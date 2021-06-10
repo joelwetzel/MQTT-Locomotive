@@ -8,11 +8,7 @@
 #define USER_MQTT_PORT            1883
 
 
-#ifdef ARDUINO_ESP8266_NODEMCU
-    #define MQTT_CONNECTED_PIN        2
-#elif ARDUINO_ESP8266_WEMOS_D1MINI
-    #define MQTT_CONNECTED_PIN        2
-#endif
+#define MQTT_CONNECTED_PIN        2
 
 
 #define SCREEN_WIDTH 128

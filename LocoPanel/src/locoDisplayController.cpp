@@ -70,17 +70,29 @@ void LocoDisplayController::ProcessStep()
             // No locos discovered yet.
             _display.setTextSize(1);
             _display.setCursor(0, 16);
-            _display.println("Searching...");
+            _display.println("Searching");
+            _display.setCursor(0, 25);
+            _display.println("for locos...");
         }
 
         _display.setTextSize(2);
 
         std::vector<String> nextLocos = _locoList.GetListStartingAtIndex(currentIndex);
 
-        for (int i = 0; i < 4 && i < nextLocos.size(); i++)
+        for (int i = 0; i < 6 && i < nextLocos.size(); i++)
         {
-            _display.setCursor(0, 16 * i);
-            _display.println(nextLocos[i]);
+            if (i == 0)
+            {
+                _display.setTextSize(2);
+                _display.setCursor(0, 0);
+                _display.println(nextLocos[i]);
+            }
+            else
+            {
+                _display.setTextSize(1);
+                _display.setCursor(0, 16 + 9*(i-1));
+                _display.println(nextLocos[i]);
+            }
         }
         break;
     }
