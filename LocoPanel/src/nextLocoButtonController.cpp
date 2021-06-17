@@ -9,16 +9,17 @@ NextLocoButtonController::NextLocoButtonController(LocoDisplayController &locoDi
 
 void NextLocoButtonController::Setup()
 {
-    pinMode(NEXTLOCOBUTTON_PIN, INPUT);
+    pinMode(NEXTLOCOBUTTON_PIN, INPUT_PULLUP);      // Pull up the input.  The button will connect the input to ground.
 }
 
 void NextLocoButtonController::ProcessStep()
 {
     int currentButtonState = digitalRead(NEXTLOCOBUTTON_PIN);
 
-    if (currentButtonState == 1 && lastState == 0)
+    if (currentButtonState == 0 && lastState == 1)      // Trigger on push down of the button.
     {
         // Button pushed
+        //Serial.printf("Button pushed.");
         _locoDisplayController.MoveToNextLoco();
     }
 

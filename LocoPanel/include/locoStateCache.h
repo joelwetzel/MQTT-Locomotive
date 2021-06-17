@@ -1,0 +1,19 @@
+#ifndef LOCOSTATECACHE_H
+#define LOCOSTATECACHE_H
+
+#include "locoState.h"
+#include <WString.h>
+#include <stdlib.h>
+#include <vector>
+
+class LocoStateCache
+{
+    std::vector<LocoState> cachedStates;
+
+public:
+    LocoState GetStateFor(String roadName);
+
+    void SetMasterSwitchFor(String roadName, bool value);
+};
+
+#endif

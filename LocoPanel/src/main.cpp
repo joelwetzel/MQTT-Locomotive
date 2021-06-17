@@ -12,8 +12,10 @@
 
 #include "mqttHandler.h"
 #include "locoList.h"
+#include "locoStateCache.h"
 #include "locoDisplayController.h"
 #include "nextLocoButtonController.h"
+#include "masterSwitchController.h"
 
 /*****************  START GLOBALS SECTION ***********************************/
 
@@ -24,30 +26,24 @@ SimpleTimer timer;
 Adafruit_SSD1306 locoDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 LocoList locoList;
+LocoStateCache locoStateCache;
 LocoDisplayController locoDisplayController(locoList, locoDisplay);
-NextLocoButtonController nextLocoButtonController(locoDisplayController);
-MqttHandler mqttHandler(mqttClient, locoList, locoDisplayController);
+MqttHandler mqttHandler(mqttClient, locoList, locoStateCache, locoDisplayController);
 
+NextLocoButtonController nextLocoButtonController(locoDisplayController);
+MasterSwitchController masterSwitchController(mqttHandler);
 
 /*****************  END GLOBALS SECTION ***********************************/
-
-
-void print(int index)
-{
-  Serial.printf("List starting at index %d\n", index);
-
-  std::vector<String> orderedList = locoList.GetListStartingAtIndex(index);
-  for (int i = 0; i < orderedList.size(); i++)
-  {
-    Serial.printf((orderedList[i] + "\n").c_str());
-  }
-}
 
 
 void processStep()
 {
   nextLocoButtonController.ProcessStep();
   locoDisplayController.ProcessStep();
+
+  LocoState currentState = locoStateCache.GetStateFor(locoDisplayController.GetSelectedRoadname());
+
+  masterSwitchController.ProcessStep(currentState);
 }
 
 
@@ -56,9 +52,11 @@ void setup() {
 
   pinMode(MQTT_CONNECTED_PIN, OUTPUT);
 
+  masterSwitchController.Setup();
   locoDisplayController.Setup();    // Do this before mqttHandler.Setup(), so that it displays the loading screen while connecting to wifi.
 
   mqttHandler.Setup();
+
   nextLocoButtonController.Setup();
 
   timer.setInterval(30, processStep);

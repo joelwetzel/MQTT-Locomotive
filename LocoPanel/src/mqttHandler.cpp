@@ -3,15 +3,16 @@
 #include <Regexp.h>
 
 
-MqttHandler::MqttHandler(PubSubClient &mqttClient, LocoList &locoList, LocoDisplayController &locoDisplayController)
-    : _mqttClient(mqttClient), _locoList(locoList), _locoDisplayController(locoDisplayController)
+MqttHandler::MqttHandler(PubSubClient &mqttClient, LocoList &locoList, LocoStateCache &locoStateCache, LocoDisplayController &locoDisplayController)
+    : _mqttClient(mqttClient), _locoList(locoList), _locoStateCache(locoStateCache), _locoDisplayController(locoDisplayController)
 {
-    _publishCounter = 0;
+  _publishCounter = 0;
 }
 
 
 void MqttHandler::subscribeToLoco(String roadName)
 {
+  Serial.printf((roadName + "subscripeToLoco\n").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/masterswitch").c_str());
 }
 
@@ -49,7 +50,6 @@ void MqttHandler::Setup()
       ms.Target((char*)strTopic.c_str());
 
       char result = ms.Match("locomotives\/([a-zA-Z0-9]+)\/attributes\/masterswitch\0", 0);
-      //char result = ms.Match("attributes\/masterswitch", 0);
 
       if (result == REGEXP_MATCHED && ms.level == 1)    // Matched and one captured match.
       {
@@ -57,9 +57,7 @@ void MqttHandler::Setup()
         char *roadName = ms.GetCapture(buf, 0);
         int masterSwitch = intPayload;
 
-        Serial.printf("Roadname: ");
-        Serial.printf(roadName);
-        Serial.printf("\n");
+        _locoStateCache.SetMasterSwitchFor(String(roadName), masterSwitch);
       }
     }
   });
@@ -164,65 +162,71 @@ void MqttHandler::reconnect()
 
 void MqttHandler::Loop()
 {
-    if (!_mqttClient.connected()) 
-    {
-      _locoDisplayController.HandleDisconnected();
-      digitalWrite(MQTT_CONNECTED_PIN, 1);
-      reconnect();
-    }
+  if (!_mqttClient.connected()) 
+  {
+    _locoDisplayController.HandleDisconnected();
+    digitalWrite(MQTT_CONNECTED_PIN, 1);
+    reconnect();
+  }
 
-    _mqttClient.loop();
-    ArduinoOTA.handle();
+  _mqttClient.loop();
+  ArduinoOTA.handle();
 }
 
 
 void MqttHandler::ProcessStep()
 {
-    // Publish attributes to MQTT, if:
-    //   - They have changed
-    //   - Or every 30-60 seconds
+  // Publish attributes to MQTT, if:
+  //   - They have changed
+  //   - Or every 30-60 seconds
 
-    // float battery = _batteryDriver.GetVoltage();
-    // if ((fabs(battery - _lastBattery) > 0.05 && _publishCounter % 50 == 0) || _publishCounter % 396 == 0)
-    // {
-    //     publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/battery", _batteryDriver.GetVoltage());
-    //     _lastBattery = battery;
-    // }
+  // float battery = _batteryDriver.GetVoltage();
+  // if ((fabs(battery - _lastBattery) > 0.05 && _publishCounter % 50 == 0) || _publishCounter % 396 == 0)
+  // {
+  //     publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/battery", _batteryDriver.GetVoltage());
+  //     _lastBattery = battery;
+  // }
 
 
-    if (_publishCounter == 1500)
-    {
-        _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/panelStatus", "OK"); 
-        _publishCounter = 0;
-    }
+  if (_publishCounter == 1500)
+  {
+      _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/panelStatus", "OK");
+      _publishCounter = 0;
+  }
 
-    _publishCounter++;
+  _publishCounter++;
+}
+
+
+void MqttHandler::SendMasterSwitchFor(String roadname, bool value)
+{
+  publish((String("locomotives/") + roadname + "/commands/masterswitch").c_str(), value);
 }
 
 
 void MqttHandler::publish(const char *topic, float value)
 {
-    char charArray[50];
+  char charArray[50];
 
-    String tempStr = String(value);
-    tempStr.toCharArray(charArray, tempStr.length() + 1);
-    _mqttClient.publish(topic, charArray);
+  String tempStr = String(value);
+  tempStr.toCharArray(charArray, tempStr.length() + 1);
+  _mqttClient.publish(topic, charArray);
 }
 
 
 void MqttHandler::publish(const char *topic, int value)
 {
-    char charArray[50];
+  char charArray[50];
 
-    String tempStr = String(value);
-    tempStr.toCharArray(charArray, tempStr.length() + 1);
-    _mqttClient.publish(topic, charArray);
+  String tempStr = String(value);
+  tempStr.toCharArray(charArray, tempStr.length() + 1);
+  _mqttClient.publish(topic, charArray);
 }
 
 
 void MqttHandler::publish(const char *topic, const char *value)
 {
-    _mqttClient.publish(topic, value);
+  _mqttClient.publish(topic, value);
 }
 
 

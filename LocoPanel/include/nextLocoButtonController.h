@@ -5,7 +5,7 @@
 #define NEXTLOCOBUTTONCONTROLLER_H
 
 
-#define NEXTLOCOBUTTON_PIN D6
+#define NEXTLOCOBUTTON_PIN D7
 
 class NextLocoButtonController
 {

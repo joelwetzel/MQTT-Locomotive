@@ -6,6 +6,7 @@
 #include "config.h"
 
 #include "locoList.h"
+#include "locoStateCache.h"
 #include "locoDisplayController.h"
 
 #ifndef MQTTHANDLER_H
@@ -17,6 +18,7 @@ class MqttHandler
     PubSubClient &_mqttClient;
 
     LocoList &_locoList;
+    LocoStateCache &_locoStateCache;
     LocoDisplayController &_locoDisplayController;
 
     const char* ssid = WIFI_SSID; 
@@ -45,11 +47,13 @@ class MqttHandler
     void subscribeToLoco(String roadName);
 
 public:
-    MqttHandler(PubSubClient &mqttClient, LocoList &locoList, LocoDisplayController &locoDisplayController);
+    MqttHandler(PubSubClient &mqttClient, LocoList &locoList, LocoStateCache &locoStateCache, LocoDisplayController &locoDisplayController);
 
     void Setup();
     void Loop();
     void ProcessStep();
+
+    void SendMasterSwitchFor(String roadname, bool value);
 };
 
 #endif
