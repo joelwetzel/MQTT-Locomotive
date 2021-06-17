@@ -200,6 +200,11 @@ void MqttHandler::ProcessStep()
 
 void MqttHandler::SendMasterSwitchFor(String roadname, bool value)
 {
+  if (roadname.length() == 0)
+  {
+    return;
+  }
+
   publish((String("locomotives/") + roadname + "/commands/masterswitch").c_str(), value);
 }
 
