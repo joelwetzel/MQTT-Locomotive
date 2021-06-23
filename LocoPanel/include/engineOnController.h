@@ -1,15 +1,15 @@
-#ifndef MASTERSWITCHCONTROLLER_H
-#define MASTERSWITCHCONTROLLER_H
+#ifndef ENGINEONCONTROLLER_H
+#define ENGINEONCONTROLLER_H
 
 #include "locoState.h"
 #include "mqttHandler.h"
 
 #include <SparkFun_TCA9534.h>
 
-#define MASTER_SWITCH_BUTTON_PIN 0
-#define MASTER_SWITCH_LED_PIN 1
+#define ENGINE_ON_BUTTON_PIN 2
+#define ENGINE_ON_LED_PIN 3
 
-class MasterSwitchController
+class EngineOnController
 {
     MqttHandler &_mqttHandler;
     TCA9534 &_qwiicGpio;
@@ -17,7 +17,7 @@ class MasterSwitchController
     int lastState;
 
 public:
-    MasterSwitchController(MqttHandler &mqttHandler, TCA9534 &qwiicGpio);
+    EngineOnController(MqttHandler &mqttHandler, TCA9534 &qwiicGpio);
 
     void Setup();
     void ProcessStep(LocoState currentState);

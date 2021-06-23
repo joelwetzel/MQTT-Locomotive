@@ -7,6 +7,7 @@ struct LocoState
 {
     String RoadName;
     bool MasterSwitch;
+    bool EngineOn;
 };
 
 #endif

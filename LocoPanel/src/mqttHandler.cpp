@@ -12,8 +12,9 @@ MqttHandler::MqttHandler(PubSubClient &mqttClient, LocoList &locoList, LocoState
 
 void MqttHandler::subscribeToLoco(String roadName)
 {
-  Serial.printf((roadName + "subscripeToLoco\n").c_str());
+  //Serial.printf((roadName + "subscripeToLoco\n").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/masterswitch").c_str());
+  _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/engineon").c_str());
 }
 
 
@@ -58,6 +59,22 @@ void MqttHandler::Setup()
         int masterSwitch = intPayload;
 
         _locoStateCache.SetMasterSwitchFor(String(roadName), masterSwitch);
+      }
+    }
+    else if (strTopic.endsWith("/engineon"))
+    {
+      MatchState ms;
+      ms.Target((char*)strTopic.c_str());
+
+      char result = ms.Match("locomotives\/([a-zA-Z0-9]+)\/attributes\/engineon\0", 0);
+
+      if (result == REGEXP_MATCHED && ms.level == 1)    // Matched and one captured match.
+      {
+        char buf [100];
+        char *roadName = ms.GetCapture(buf, 0);
+        int engineOn = intPayload;
+
+        _locoStateCache.SetEngineOnFor(String(roadName), engineOn);
       }
     }
   });
@@ -206,6 +223,17 @@ void MqttHandler::SendMasterSwitchFor(String roadname, bool value)
   }
 
   publish((String("locomotives/") + roadname + "/commands/masterswitch").c_str(), value);
+}
+
+
+void MqttHandler::SendEngineOnFor(String roadname, bool value)
+{
+  if (roadname.length() == 0)
+  {
+    return;
+  }
+
+  publish((String("locomotives/") + roadname + "/commands/engineon").c_str(), value);
 }
 
 

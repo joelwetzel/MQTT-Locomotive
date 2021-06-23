@@ -14,6 +14,7 @@ public:
     LocoState GetStateFor(String roadName);
 
     void SetMasterSwitchFor(String roadName, bool value);
+    void SetEngineOnFor(String roadName, bool value);
 };
 
 #endif

@@ -17,7 +17,7 @@ LocoState LocoStateCache::GetStateFor(String roadName)
 
 void LocoStateCache::SetMasterSwitchFor(String roadName, bool value)
 {
-    Serial.printf((roadName + "SetMasterSwitchFor %d\n").c_str(), value);
+    //Serial.printf((roadName + "SetMasterSwitchFor %d\n").c_str(), value);
 
     for (int i = 0; i < cachedStates.size(); i++)
     {
@@ -32,6 +32,27 @@ void LocoStateCache::SetMasterSwitchFor(String roadName, bool value)
     LocoState newState;
     newState.RoadName = roadName;
     newState.MasterSwitch = value;
+
+    cachedStates.push_back(newState);
+}
+
+void LocoStateCache::SetEngineOnFor(String roadName, bool value)
+{
+    //Serial.printf((roadName + "SetEngineOnFor %d\n").c_str(), value);
+
+    for (int i = 0; i < cachedStates.size(); i++)
+    {
+        if (cachedStates[i].RoadName == roadName)
+        {
+            cachedStates[i].EngineOn = value;
+            return;
+        }
+    }
+
+    // If no match, add a new LocoState to the cache.
+    LocoState newState;
+    newState.RoadName = roadName;
+    newState.EngineOn = value;
 
     cachedStates.push_back(newState);
 }

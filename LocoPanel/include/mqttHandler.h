@@ -54,6 +54,7 @@ public:
     void ProcessStep();
 
     void SendMasterSwitchFor(String roadname, bool value);
+    void SendEngineOnFor(String roadname, bool value);
 };
 
 #endif
