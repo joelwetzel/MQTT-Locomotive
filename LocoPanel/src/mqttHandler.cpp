@@ -15,6 +15,7 @@ void MqttHandler::subscribeToLoco(String roadName)
   //Serial.printf((roadName + "subscripeToLoco\n").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/masterswitch").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/engineon").c_str());
+  _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/reverser").c_str());
 }
 
 
@@ -75,6 +76,22 @@ void MqttHandler::Setup()
         int engineOn = intPayload;
 
         _locoStateCache.SetEngineOnFor(String(roadName), engineOn);
+      }
+    }
+    else if (strTopic.endsWith("/reverser"))
+    {
+      MatchState ms;
+      ms.Target((char*)strTopic.c_str());
+
+      char result = ms.Match("locomotives\/([a-zA-Z0-9]+)\/attributes\/reverser\0", 0);
+
+      if (result == REGEXP_MATCHED && ms.level == 1)    // Matched and one captured match.
+      {
+        char buf [100];
+        char *roadName = ms.GetCapture(buf, 0);
+        int reverser = intPayload;
+
+        _locoStateCache.SetReverserFor(String(roadName), reverser);
       }
     }
   });

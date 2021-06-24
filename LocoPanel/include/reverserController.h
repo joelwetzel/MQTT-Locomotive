@@ -1,6 +1,8 @@
 #ifndef REVERSERCONTROLLER_H
 #define REVERSERCONTROLLER_H
 
+#include <WString.h>
+
 #include "locoState.h"
 #include "mqttHandler.h"
 
@@ -15,19 +17,31 @@
 #define REVERSER_CLOCKWISE 0
 #define REVERSER_COUNTERCLOCKWISE 1
 
+enum ReverserState
+{
+    Unknown,
+    Resetting,
+    AcceptingInput
+};
+
+
 class ReverserController
 {
     MqttHandler &_mqttHandler;
     ADS1015 &_qwiicAdc;
     SCMD &_qwiicMotorDriver;
 
-    //int lastState;
+    float lastPercentage;
+
+    ReverserState currentReverserState;
+
+    String currentLocoRoadName;
 
 public:
     ReverserController(MqttHandler &mqttHandler, ADS1015 &qwiicAdc, SCMD &qwiicMotorDriver);
 
     void Setup();
-    void ProcessStep(LocoState currentState);
+    void ProcessStep(LocoState currentLocoState);
 };
 
 #endif

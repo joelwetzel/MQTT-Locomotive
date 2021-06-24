@@ -8,6 +8,7 @@ struct LocoState
     String RoadName;
     bool MasterSwitch;
     bool EngineOn;
+    int Reverser;
 };
 
 #endif
