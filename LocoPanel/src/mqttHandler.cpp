@@ -254,6 +254,17 @@ void MqttHandler::SendEngineOnFor(String roadname, bool value)
 }
 
 
+void MqttHandler::SendReverserFor(String roadname, int value)
+{
+  if (roadname.length() == 0)
+  {
+    return;
+  }
+
+  publish((String("locomotives/") + roadname + "/commands/reverser").c_str(), value);
+}
+
+
 void MqttHandler::publish(const char *topic, float value)
 {
   char charArray[50];

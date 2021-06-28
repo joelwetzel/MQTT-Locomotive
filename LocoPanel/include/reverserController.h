@@ -14,10 +14,14 @@
 
 #define REVERSER_MAX_VOLTAGE_READING 1660.0
 
-#define REVERSER_CLOCKWISE 0
-#define REVERSER_COUNTERCLOCKWISE 1
+#define REVERSER_CLOCKWISE 1
+#define REVERSER_COUNTERCLOCKWISE 0
 
-enum ReverserState
+#define REVERSER_DETENT_MINUS_ONE 0.3
+#define REVERSER_DETENT_ZERO 0.5
+#define REVERSER_DETENT_ONE 0.7
+
+enum ReverserMode
 {
     Unknown,
     Resetting,
@@ -32,10 +36,13 @@ class ReverserController
     SCMD &_qwiicMotorDriver;
 
     float lastPercentage;
+    int lastKnownReverser;
 
-    ReverserState currentReverserState;
+    ReverserMode currentReverserMode;
 
     String currentLocoRoadName;
+
+    float getDetentPercentageForReverser(int reverser);
 
 public:
     ReverserController(MqttHandler &mqttHandler, ADS1015 &qwiicAdc, SCMD &qwiicMotorDriver);

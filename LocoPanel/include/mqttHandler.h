@@ -55,6 +55,7 @@ public:
 
     void SendMasterSwitchFor(String roadname, bool value);
     void SendEngineOnFor(String roadname, bool value);
+    void SendReverserFor(String roadname, int value);
 };
 
 #endif
