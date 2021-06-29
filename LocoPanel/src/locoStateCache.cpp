@@ -82,3 +82,31 @@ void LocoStateCache::SetReverserFor(String roadName, int value)
 
     cachedStates.push_back(newState);
 }
+
+void LocoStateCache::SetHeadlightsFor(String roadName, int value)
+{
+    if (value != 0 &&
+        value != 1 &&
+        value != 2 &&
+        value != 3 &&
+        value != 4)
+    {
+        return;
+    }
+
+    for (int i = 0; i < cachedStates.size(); i++)
+    {
+        if (cachedStates[i].RoadName == roadName)
+        {
+            cachedStates[i].Headlights = value;
+            return;
+        }
+    }
+
+    // If no match, add a new LocoState to the cache.
+    LocoState newState;
+    newState.RoadName = roadName;
+    newState.Headlights = value;
+
+    cachedStates.push_back(newState);
+}

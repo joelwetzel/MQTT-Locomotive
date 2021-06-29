@@ -9,6 +9,7 @@ struct LocoState
     bool MasterSwitch;
     bool EngineOn;
     int Reverser;
+    int Headlights;
 };
 
 #endif

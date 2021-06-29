@@ -7,7 +7,7 @@ ReverserController::ReverserController(MqttHandler &mqttHandler, ADS1015 &qwiicA
     lastPercentage = -1.0;
     lastKnownReverser = -2;
 
-    currentReverserMode = ReverserMode::Unknown;
+    currentReverserMode = ControllerMode::Unknown;
 
     currentLocoRoadName = "";
 }
@@ -53,33 +53,33 @@ void ReverserController::ProcessStep(LocoState currentLocoState)
         //Serial.println("Loco changed.  Resetting...");
         //Serial.println(currentLocoState.RoadName.c_str());
         //Serial.println(currentLocoRoadName.c_str());
-        currentReverserMode = ReverserMode::Resetting;
+        currentReverserMode = ControllerMode::Resetting;
         currentLocoRoadName = currentLocoState.RoadName;
     }
 
     // Behavior changes, depending on what mode we're in.
-    if (currentReverserMode == ReverserMode::Resetting)
+    if (currentReverserMode == ControllerMode::Resetting)
     {
         //Serial.println("Resetting");
         float desiredPercentage = getDetentPercentageForReverser(currentLocoState.Reverser);
 
         if (fabs(percentage - desiredPercentage) < 0.02)
         {
-            _qwiicMotorDriver.setDrive(0, REVERSER_CLOCKWISE, 0);
-            currentReverserMode = ReverserMode::AcceptingInput;
+            _qwiicMotorDriver.setDrive(REVERSER_MOTOR_NUM, REVERSER_CLOCKWISE, 0);
+            currentReverserMode = ControllerMode::AcceptingInput;
             lastKnownReverser = currentLocoState.Reverser;
             Serial.println("Now accepting input.");
         }
         else if (percentage > desiredPercentage)
         {
-            _qwiicMotorDriver.setDrive(0, REVERSER_COUNTERCLOCKWISE, 255);
+            _qwiicMotorDriver.setDrive(REVERSER_MOTOR_NUM, REVERSER_COUNTERCLOCKWISE, 255);
         }
         else
         {
-            _qwiicMotorDriver.setDrive(0, REVERSER_CLOCKWISE, 255);
+            _qwiicMotorDriver.setDrive(REVERSER_MOTOR_NUM, REVERSER_CLOCKWISE, 255);
         }
     }
-    else if (currentReverserMode == ReverserMode::AcceptingInput)
+    else if (currentReverserMode == ControllerMode::AcceptingInput)
     {
         //Serial.println("Accepting input");
         // Which detent are we closest to?
@@ -106,19 +106,19 @@ void ReverserController::ProcessStep(LocoState currentLocoState)
         if (fabs(percentage - percentageForClosestDetent) < 0.02)
         {
             newReverser = closestDetentsReverser;       // We arrived at a detent
-            _qwiicMotorDriver.setDrive(0, REVERSER_CLOCKWISE, 0);
+            _qwiicMotorDriver.setDrive(REVERSER_MOTOR_NUM, REVERSER_CLOCKWISE, 0);
             _mqttHandler.SendReverserFor(currentLocoState.RoadName, newReverser);
         }
         else if (percentage > percentageForClosestDetent)       // Snap to the closest detent
         {
-            _qwiicMotorDriver.setDrive(0, REVERSER_COUNTERCLOCKWISE, 255);
+            _qwiicMotorDriver.setDrive(REVERSER_MOTOR_NUM, REVERSER_COUNTERCLOCKWISE, 255);
         }
         else                                                    // Snap to the closest detent
         {
-            _qwiicMotorDriver.setDrive(0, REVERSER_CLOCKWISE, 255);
+            _qwiicMotorDriver.setDrive(REVERSER_MOTOR_NUM, REVERSER_CLOCKWISE, 255);
         }
     }
-    else if (currentReverserMode == ReverserMode::Unknown)
+    else if (currentReverserMode == ControllerMode::Unknown)
     {
         ;   // Do nothing
     }

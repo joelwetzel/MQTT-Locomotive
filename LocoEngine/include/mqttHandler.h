@@ -47,6 +47,7 @@ class MqttHandler
     bool _lastEngineOn;
     float _lastEngineRpms;
     int _lastReverser;
+    int _lastHeadlights;
     float _lastSmokePercent;
     float _lastWheelRpms;
     float _lastSpeedMph;
