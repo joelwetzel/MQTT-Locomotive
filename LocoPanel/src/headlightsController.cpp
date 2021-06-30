@@ -66,10 +66,10 @@ void HeadlightsController::ProcessStep(LocoState currentLocoState)
     // Behavior changes, depending on what mode we're in.
     if (currentControllerMode == ControllerMode::Resetting)
     {
-        //Serial.println("Resetting");
+        //Serial.printf("Resetting: %d", currentLocoState.Headlights);
         float desiredPercentage = getDetentPercentageForHeadlights(currentLocoState.Headlights);
 
-        if (fabs(percentage - desiredPercentage) < 0.02)
+        if (fabs(percentage - desiredPercentage) < 0.002)
         {
             _qwiicMotorDriver.setDrive(HEADLIGHTS_MOTOR_NUM, HEADLIGHTS_CLOCKWISE, 0);
             currentControllerMode = ControllerMode::AcceptingInput;

@@ -10,6 +10,15 @@ struct LocoState
     bool EngineOn;
     int Reverser;
     int Headlights;
+
+public:
+    LocoState()
+    {
+        MasterSwitch = false;
+        EngineOn = false;
+        Reverser = 0;
+        Headlights = 0;
+    }
 };
 
 #endif
