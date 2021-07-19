@@ -17,6 +17,7 @@ void MqttHandler::subscribeToLoco(String roadName)
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/engineon").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/reverser").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/headlights").c_str());
+  _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/cablights").c_str());
 }
 
 
@@ -109,6 +110,22 @@ void MqttHandler::Setup()
         int headlights = intPayload;
 
         _locoStateCache.SetHeadlightsFor(String(roadName), headlights);
+      }
+    }
+    else if (strTopic.endsWith("/cablights"))
+    {
+      MatchState ms;
+      ms.Target((char*)strTopic.c_str());
+
+      char result = ms.Match("locomotives\/([a-zA-Z0-9]+)\/attributes\/cablights\0", 0);
+
+      if (result == REGEXP_MATCHED && ms.level == 1)    // Matched and one captured match.
+      {
+        char buf [100];
+        char *roadName = ms.GetCapture(buf, 0);
+        int cablights = intPayload;
+
+        _locoStateCache.SetCablightsFor(String(roadName), cablights);
       }
     }
   });
@@ -290,6 +307,17 @@ void MqttHandler::SendHeadlightsFor(String roadname, int value)
   }
 
   publish((String("locomotives/") + roadname + "/commands/headlights").c_str(), value);
+}
+
+
+void MqttHandler::SendCablightsFor(String roadname, bool value)
+{
+  if (roadname.length() == 0)
+  {
+    return;
+  }
+
+  publish((String("locomotives/") + roadname + "/commands/cablights").c_str(), value);
 }
 
 

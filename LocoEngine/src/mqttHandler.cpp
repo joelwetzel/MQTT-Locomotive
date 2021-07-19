@@ -10,6 +10,7 @@ MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlMode
     _lastEngineRpms = -1;
     _lastReverser = 0;
     _lastHeadlights = 0;
+    _lastCablights = false;
     _lastSmokePercent = -1;
     _lastWheelRpms = 0.0;
     _lastSpeedMph = 0.0;
@@ -65,17 +66,14 @@ void MqttHandler::Setup()
                  strTopic == _masterReverserTopic)
         {
             _ptrControlModel->SetReverser(intPayload);
-            //publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/reverser", intPayload);
         }
         else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/cablights")
         {
             _lightingDriver.SetCabLights(intPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/cablights", _lightingDriver.GetCabLights());
         }
         else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/headlights")
         {
             _lightingDriver.SetHeadlights(intPayload);
-            //publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/headlights", _lightingDriver.GetHeadlights());
         }
         else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell")
         {
@@ -328,6 +326,13 @@ void MqttHandler::ProcessStep()
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/headlights", headlights);
         _lastHeadlights = headlights;
+    }
+
+    bool cablights = _lightingDriver.GetCabLights();
+    if ((cablights != _lastCablights || _publishCounter % 218 == 0) || boot)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/cablights", cablights);
+        _lastCablights = cablights;
     }
 
     float engineRpms = _ptrControlModel->GetEngineRpms();

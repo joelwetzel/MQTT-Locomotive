@@ -17,6 +17,7 @@ public:
     void SetEngineOnFor(String roadName, bool value);
     void SetReverserFor(String roadName, int value);
     void SetHeadlightsFor(String roadname, int value);
+    void SetCablightsFor(String roadname, bool value);
 };
 
 #endif

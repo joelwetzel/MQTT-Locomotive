@@ -71,10 +71,8 @@ void LightingDriver::ProcessStep()
 {
     if (_batteryDriver.GetMasterSwitch() == false)
     {
-        digitalWrite(CAB_PIN, 0);
-        digitalWrite(FRONT_PIN, 0);
-        digitalWrite(REAR_PIN, 0);
-        return;
+        _cabLightsOn = false;
+        _headlightMode = HeadlightModes::Off;
     }
 
     digitalWrite(CAB_PIN, _cabLightsOn);

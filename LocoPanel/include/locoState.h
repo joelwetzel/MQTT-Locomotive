@@ -10,6 +10,7 @@ struct LocoState
     bool EngineOn;
     int Reverser;
     int Headlights;
+    bool Cablights;
 
 public:
     LocoState()
@@ -18,6 +19,7 @@ public:
         EngineOn = false;
         Reverser = 0;
         Headlights = 0;
+        Cablights = false;
     }
 };
 

@@ -57,6 +57,7 @@ public:
     void SendEngineOnFor(String roadname, bool value);
     void SendReverserFor(String roadname, int value);
     void SendHeadlightsFor(String roadname, int value);
+    void SendCablightsFor(String roadname, bool value);
 };
 
 #endif
