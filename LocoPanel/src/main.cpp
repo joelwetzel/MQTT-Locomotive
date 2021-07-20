@@ -33,7 +33,8 @@ PubSubClient mqttClient(espClient);
 SimpleTimer timer;
 
 Adafruit_SSD1306 locoDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-TCA9534 qwiicGpio;
+TCA9534 qwiicGpio1;
+TCA9534 qwiicGpio2;
 ADS1015 qwiicAdc;
 SCMD qwiicMotorDriver;
 
@@ -43,12 +44,12 @@ LocoDisplayController locoDisplayController(locoList, locoDisplay);
 MqttHandler mqttHandler(mqttClient, locoList, locoStateCache, locoDisplayController);
 
 NextLocoButtonController nextLocoButtonController(locoDisplayController);
-MasterSwitchController masterSwitchController(mqttHandler, qwiicGpio);
-EngineOnController engineOnController(mqttHandler, qwiicGpio);
+MasterSwitchController masterSwitchController(mqttHandler, qwiicGpio1);
+EngineOnController engineOnController(mqttHandler, qwiicGpio1);
 ReverserController reverserController(mqttHandler, qwiicAdc, qwiicMotorDriver);
 HeadlightsController headlightsController(mqttHandler, qwiicAdc, qwiicMotorDriver);
-CablightsController cablightsController(mqttHandler, qwiicGpio);
-BellController bellController(mqttHandler, qwiicGpio);
+CablightsController cablightsController(mqttHandler, qwiicGpio1);
+BellController bellController(mqttHandler, qwiicGpio1);
 
 /*****************  END GLOBALS SECTION ***********************************/
 
@@ -77,12 +78,19 @@ void setup() {
   delay(1000);
 
   // Initialize Qwiic GPIO
-  Serial.println("Looking for Qwiic GPIO...");
-  if (qwiicGpio.begin() == false) {
-    Serial.println("Check connections.  No Qwiic GPIO detected.");
+  Serial.println("Looking for Qwiic GPIO 1...");
+  if (qwiicGpio1.begin(Wire, 0x27) == false) {
+    Serial.println("Check connections.  No Qwiic GPIO 1 detected.");
     while (1);
   }
-  Serial.println("Found Qwiic GPIO.");
+  Serial.println("Found Qwiic GPIO 1.");
+
+  Serial.println("Looking for Qwiic GPIO 2...");
+  if (qwiicGpio2.begin(Wire, 0x26) == false) {
+    Serial.println("Check connections.  No Qwiic GPIO 2 detected.");
+    while (1);
+  }
+  Serial.println("Found Qwiic GPIO 2.");
 
   // Initialize Qwiic ADC
   Serial.println("Looking for Qwiic ADC...");
