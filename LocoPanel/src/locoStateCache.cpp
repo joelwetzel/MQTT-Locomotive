@@ -130,3 +130,23 @@ void LocoStateCache::SetCablightsFor(String roadName, bool value)
 
     cachedStates.push_back(newState);
 }
+
+
+void LocoStateCache::SetBellFor(String roadName, bool value)
+{
+    for (int i = 0; i < cachedStates.size(); i++)
+    {
+        if (cachedStates[i].RoadName == roadName)
+        {
+            cachedStates[i].Bell = value;
+            return;
+        }
+    }
+
+    // If no match, add a new LocoState to the cache.
+    LocoState newState;
+    newState.RoadName = roadName;
+    newState.Bell = value;
+
+    cachedStates.push_back(newState);
+}

@@ -24,6 +24,7 @@
 #include "reverserController.h"
 #include "headlightsController.h"
 #include "cablightsController.h"
+#include "bellController.h"
 
 /*****************  START GLOBALS SECTION ***********************************/
 
@@ -47,6 +48,7 @@ EngineOnController engineOnController(mqttHandler, qwiicGpio);
 ReverserController reverserController(mqttHandler, qwiicAdc, qwiicMotorDriver);
 HeadlightsController headlightsController(mqttHandler, qwiicAdc, qwiicMotorDriver);
 CablightsController cablightsController(mqttHandler, qwiicGpio);
+BellController bellController(mqttHandler, qwiicGpio);
 
 /*****************  END GLOBALS SECTION ***********************************/
 
@@ -63,6 +65,7 @@ void processStep()
   reverserController.ProcessStep(currentState);
   headlightsController.ProcessStep(currentState);
   cablightsController.ProcessStep(currentState);
+  bellController.ProcessStep(currentState);
 
   mqttHandler.ProcessStep();
 }
@@ -116,6 +119,7 @@ void setup() {
   reverserController.Setup();
   headlightsController.Setup();
   cablightsController.Setup();
+  bellController.Setup();
 
   locoDisplayController.Setup(); // Do this before mqttHandler.Setup(), so that it displays the loading screen while connecting to wifi.
 

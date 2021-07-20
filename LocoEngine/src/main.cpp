@@ -50,7 +50,7 @@ MotorDriver motorDriver;
 SmokeDriver smokeDriver;
 TachDriver tachDriver;
 LightingDriver lightingDriver(ptrControlModel, batteryDriver);
-SoundController soundController;
+SoundController soundController(batteryDriver);
 
 MqttHandler mqttHandler(mqttClient, ptrControlModel, lightingDriver, soundController, batteryDriver, smokeDriver, tachDriver, pidController);
 

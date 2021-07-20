@@ -11,6 +11,7 @@ struct LocoState
     int Reverser;
     int Headlights;
     bool Cablights;
+    bool Bell;
 
 public:
     LocoState()
@@ -20,6 +21,7 @@ public:
         Reverser = 0;
         Headlights = 0;
         Cablights = false;
+        Bell = false;
     }
 };
 

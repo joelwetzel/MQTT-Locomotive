@@ -1,7 +1,8 @@
 #include "soundController.h"
 
 
-SoundController::SoundController()
+SoundController::SoundController(BatteryDriver &batteryDriver)
+    : _batteryDriver(batteryDriver)
 {
     _bell = false;
     _horn = false;
@@ -15,7 +16,10 @@ void SoundController::SetBell(bool on)
     _bell = on;
     _bellCount = 0;
 
-    // TODO - depend on master switch
+    if (!_batteryDriver.GetMasterSwitch())
+    {
+        _bell = false;
+    }
 }
 
 
@@ -30,7 +34,10 @@ void SoundController::SetHorn(bool on)
     _horn = on;
     _hornCount = 0;
 
-    // TODO - depend on master switch
+    if (!_batteryDriver.GetMasterSwitch())
+    {
+        _horn = false;
+    }
 }
 
 
@@ -47,6 +54,12 @@ void SoundController::Setup()
 
 void SoundController::ProcessStep()
 {
+    if (_batteryDriver.GetMasterSwitch() == false)
+    {
+        _bell = false;
+        _horn = false;
+    }
+
     // Turn off the bell after 30 seconds.
     if (_bell)
     {

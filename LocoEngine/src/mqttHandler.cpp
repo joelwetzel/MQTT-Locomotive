@@ -78,7 +78,6 @@ void MqttHandler::Setup()
         else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/bell")
         {
             _soundController.SetBell(intPayload);
-            publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", _soundController.GetBell());
         }
         else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/horn")
         {
@@ -382,7 +381,7 @@ void MqttHandler::ProcessStep()
 
 #ifdef PUBLISH_SOUNDS
     bool bell = _soundController.GetBell();
-    if ((bell != _lastBell) || boot)
+    if ((bell != _lastBell || _publishCounter % 258 == 0) || boot)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", bell);
         _lastBell = bell;

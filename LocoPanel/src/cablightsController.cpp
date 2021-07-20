@@ -26,7 +26,7 @@ void CablightsController::ProcessStep(LocoState currentState)
     if (currentButtonState == 0 && lastState == 1) // Trigger on push down of the button.
     {
         // Button pushed
-        Serial.printf("Cablights %d\n", currentButtonState);
+        //Serial.printf("Cablights %d\n", currentButtonState);
         _mqttHandler.SendCablightsFor(currentState.RoadName, !currentState.Cablights);
     }
 
