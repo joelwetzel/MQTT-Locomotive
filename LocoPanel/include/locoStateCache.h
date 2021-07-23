@@ -19,6 +19,7 @@ public:
     void SetHeadlightsFor(String roadname, int value);
     void SetCablightsFor(String roadname, bool value);
     void SetBellFor(String roadname, bool value);
+    void SetHornFor(String roadname, bool value);
 };
 
 #endif

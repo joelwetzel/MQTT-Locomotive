@@ -19,6 +19,7 @@ void MqttHandler::subscribeToLoco(String roadName)
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/headlights").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/cablights").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/bell").c_str());
+  _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/horn").c_str());
 }
 
 
@@ -145,6 +146,22 @@ void MqttHandler::Setup()
         //Serial.printf("Received bell %d\n", bell);
 
         _locoStateCache.SetBellFor(String(roadName), bell);
+      }
+    }
+    else if (strTopic.endsWith("/horn"))
+    {
+      MatchState ms;
+      ms.Target((char*)strTopic.c_str());
+
+      char result = ms.Match("locomotives\/([a-zA-Z0-9]+)\/attributes\/horn\0", 0);
+
+      if (result == REGEXP_MATCHED && ms.level == 1)    // Matched and one captured match.
+      {
+        char buf [100];
+        char *roadName = ms.GetCapture(buf, 0);
+        int horn = intPayload;
+
+        _locoStateCache.SetHornFor(String(roadName), horn);
       }
     }
   });
@@ -348,6 +365,17 @@ void MqttHandler::SendBellFor(String roadname, bool value)
   }
 
   publish((String("locomotives/") + roadname + "/commands/bell").c_str(), value);
+}
+
+
+void MqttHandler::SendHornFor(String roadname, bool value)
+{
+  if (roadname.length() == 0)
+  {
+    return;
+  }
+
+  publish((String("locomotives/") + roadname + "/commands/horn").c_str(), value);
 }
 
 

@@ -59,6 +59,7 @@ public:
     void SendHeadlightsFor(String roadname, int value);
     void SendCablightsFor(String roadname, bool value);
     void SendBellFor(String roadname, bool value);
+    void SendHornFor(String roadname, bool value);
 };
 
 #endif

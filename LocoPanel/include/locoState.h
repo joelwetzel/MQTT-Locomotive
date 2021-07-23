@@ -12,6 +12,7 @@ struct LocoState
     int Headlights;
     bool Cablights;
     bool Bell;
+    bool Horn;
 
 public:
     LocoState()
@@ -22,6 +23,7 @@ public:
         Headlights = 0;
         Cablights = false;
         Bell = false;
+        Horn = false;
     }
 };
 
