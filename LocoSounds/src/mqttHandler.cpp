@@ -55,8 +55,9 @@ void MqttHandler::Setup()
             ESP.restart();
         }
     });
-}
 
+    reconnect();
+}
 
 void MqttHandler::setup_wifi()
 {
@@ -172,7 +173,12 @@ void MqttHandler::Loop()
 
 void MqttHandler::ProcessStep()
 {
-    if (_publishCounter == 1500)
+    if (_publishCounter % 451 == 0)
+    {
+      publish("locomotives/"USER_DEVICE_NETWORK_ID"/audioFreeHeap", (int)ESP.getFreeHeap()); 
+    }
+
+    if (_publishCounter == 500)
     {
         _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/audioStatus", "OK"); 
         _publishCounter = 0;
