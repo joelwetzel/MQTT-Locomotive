@@ -4,17 +4,16 @@
 MasterSwitchController::MasterSwitchController(MqttHandler &mqttHandler, TCA9534 &qwiicGpio)
     : _mqttHandler(mqttHandler), _qwiicGpio(qwiicGpio)
 {
-    lastState = 0;
+    lastOnButtonState = 0;
+    lastOffButtonState = 0;
 }
 
 void MasterSwitchController::Setup()
 {
-    //pinMode(MASTER_SWITCH_BUTTON_PIN, INPUT);
-    _qwiicGpio.pinMode(MASTER_SWITCH_BUTTON_PIN, GPIO_IN);
+    _qwiicGpio.pinMode(MASTER_SWITCH_ON_BUTTON_PIN, GPIO_IN);
+    _qwiicGpio.pinMode(MASTER_SWITCH_OFF_BUTTON_PIN, GPIO_IN);
 
-    //pinMode(MASTER_SWITCH_LED_PIN, OUTPUT);
     _qwiicGpio.pinMode(MASTER_SWITCH_LED_PIN, GPIO_OUT);
-    //digitalWrite(MASTER_SWITCH_LED_PIN, 0);
     _qwiicGpio.digitalWrite(MASTER_SWITCH_LED_PIN, 0);
 }
 
@@ -22,16 +21,25 @@ void MasterSwitchController::ProcessStep(LocoState currentState)
 {
     _qwiicGpio.digitalWrite(MASTER_SWITCH_LED_PIN, currentState.MasterSwitch);
 
-    int currentButtonState = _qwiicGpio.digitalRead(MASTER_SWITCH_BUTTON_PIN);
+    int currentOnButtonState = _qwiicGpio.digitalRead(MASTER_SWITCH_ON_BUTTON_PIN);
+    //Serial.printf("OnButtonState: %d\n", currentOnButtonState);
 
-    //Serial.printf("%d\n", currentButtonState);
+    int currentOffButtonState = _qwiicGpio.digitalRead(MASTER_SWITCH_OFF_BUTTON_PIN);
+    //Serial.printf("OffButtonState: %d\n", currentOffButtonState);
 
-    if (currentButtonState == 0 && lastState == 1) // Trigger on push down of the button.
+    if (currentOnButtonState == 0 && lastOnButtonState == 1) // Trigger on push down of the button.
     {
         // Button pushed
-        //Serial.printf((currentState.RoadName + "Button pushed. %d\n").c_str(), currentState.MasterSwitch);
-        _mqttHandler.SendMasterSwitchFor(currentState.RoadName, !currentState.MasterSwitch);
+        //Serial.printf((currentState.RoadName + "On Button pushed.\n").c_str());
+        _mqttHandler.SendMasterSwitchFor(currentState.RoadName, true);
     }
+    lastOnButtonState = currentOnButtonState;
 
-    lastState = currentButtonState;
+    if (currentOffButtonState == 0 && lastOffButtonState == 1) // Trigger on push down of the button.
+    {
+        // Button pushed
+        //Serial.printf((currentState.RoadName + "Off Button pushed.\n").c_str());
+        _mqttHandler.SendMasterSwitchFor(currentState.RoadName, false);
+    }
+    lastOffButtonState = currentOffButtonState;
 }

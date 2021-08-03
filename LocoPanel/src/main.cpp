@@ -45,7 +45,7 @@ LocoDisplayController locoDisplayController(locoList, locoDisplay);
 MqttHandler mqttHandler(mqttClient, locoList, locoStateCache, locoDisplayController);
 
 NextLocoButtonController nextLocoButtonController(locoDisplayController);
-MasterSwitchController masterSwitchController(mqttHandler, qwiicGpio1);
+MasterSwitchController masterSwitchController(mqttHandler, qwiicGpio2);
 EngineOnController engineOnController(mqttHandler, qwiicGpio1);
 ReverserController reverserController(mqttHandler, qwiicAdc, qwiicMotorDriver);
 HeadlightsController headlightsController(mqttHandler, qwiicAdc, qwiicMotorDriver);

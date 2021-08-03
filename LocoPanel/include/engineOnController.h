@@ -6,15 +6,17 @@
 
 #include <SparkFun_TCA9534.h>
 
-#define ENGINE_ON_BUTTON_PIN 2
-#define ENGINE_ON_LED_PIN 3
+#define ENGINE_ON_ON_BUTTON_PIN 3
+#define ENGINE_ON_OFF_BUTTON_PIN 1
+#define ENGINE_ON_LED_PIN 2
 
 class EngineOnController
 {
     MqttHandler &_mqttHandler;
     TCA9534 &_qwiicGpio;
 
-    int lastState;
+    int lastOnButtonState;
+    int lastOffButtonState;
 
 public:
     EngineOnController(MqttHandler &mqttHandler, TCA9534 &qwiicGpio);
