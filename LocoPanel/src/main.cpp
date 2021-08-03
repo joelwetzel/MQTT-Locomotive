@@ -23,6 +23,7 @@
 #include "engineOnController.h"
 #include "reverserController.h"
 #include "headlightsController.h"
+#include "throttleController.h"
 #include "cablightsController.h"
 #include "bellController.h"
 #include "hornController.h"
@@ -37,7 +38,8 @@ Adafruit_SSD1306 locoDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 TCA9534 qwiicGpio1;
 TCA9534 qwiicGpio2;
 ADS1015 qwiicAdc;
-SCMD qwiicMotorDriver;
+SCMD qwiicMotorDriver1;
+SCMD qwiicMotorDriver2;
 
 LocoList locoList;
 LocoStateCache locoStateCache;
@@ -47,9 +49,10 @@ MqttHandler mqttHandler(mqttClient, locoList, locoStateCache, locoDisplayControl
 NextLocoButtonController nextLocoButtonController(locoDisplayController);
 MasterSwitchController masterSwitchController(mqttHandler, qwiicGpio2);
 EngineOnController engineOnController(mqttHandler, qwiicGpio1);
-ReverserController reverserController(mqttHandler, qwiicAdc, qwiicMotorDriver);
-HeadlightsController headlightsController(mqttHandler, qwiicAdc, qwiicMotorDriver);
+ReverserController reverserController(mqttHandler, qwiicAdc, qwiicMotorDriver1);
+HeadlightsController headlightsController(mqttHandler, qwiicAdc, qwiicMotorDriver1);
 CablightsController cablightsController(mqttHandler, qwiicGpio1);
+ThrottleController throttleController(mqttHandler, qwiicMotorDriver2);
 BellController bellController(mqttHandler, qwiicGpio1);
 HornController hornController(mqttHandler, qwiicGpio2);
 
@@ -68,6 +71,7 @@ void processStep()
   reverserController.ProcessStep(currentState);
   headlightsController.ProcessStep(currentState);
   cablightsController.ProcessStep(currentState);
+  throttleController.ProcessStep(currentState);
   bellController.ProcessStep(currentState);
   hornController.ProcessStep(currentState);
 
@@ -103,25 +107,45 @@ void setup() {
   }
   Serial.println("Found Qwiic ADC.");
 
-  // Initialize Qwiic Motor Driver
-  qwiicMotorDriver.settings.commInterface = I2C_MODE;
-  qwiicMotorDriver.settings.I2CAddress = 0x5D;
-  Serial.println("Looking for Qwiic Motor Driver...");
-  while (qwiicMotorDriver.begin() != 0xA9)
+  // Initialize Qwiic Motor Driver 1
+  qwiicMotorDriver1.settings.commInterface = I2C_MODE;
+  qwiicMotorDriver1.settings.I2CAddress = 0x5D;
+  Serial.println("Looking for Qwiic Motor Driver 1...");
+  while (qwiicMotorDriver1.begin() != 0xA9)
   {
-    Serial.println("Motor Driver ID mismatch, trying again.");
+    Serial.println("Motor Driver (1) ID mismatch, trying again.");
     delay(500);
   }
-  while (qwiicMotorDriver.ready() == false)
+  while (qwiicMotorDriver1.ready() == false)
   {
     ;
   }
-  while (qwiicMotorDriver.busy())
+  while (qwiicMotorDriver1.busy())
   {
     ;
   }
-  qwiicMotorDriver.enable();
-  Serial.println("Found Qwiic Motor Driver.");
+  qwiicMotorDriver1.enable();
+  Serial.println("Found Qwiic Motor Driver 1.");
+
+  // Initialize Qwiic Motor Driver 2
+  qwiicMotorDriver2.settings.commInterface = I2C_MODE;
+  qwiicMotorDriver2.settings.I2CAddress = 0x5E;
+  Serial.println("Looking for Qwiic Motor Driver 2...");
+  while (qwiicMotorDriver2.begin() != 0xA9)
+  {
+    Serial.println("Motor Driver (2) ID mismatch, trying again.");
+    delay(500);
+  }
+  while (qwiicMotorDriver2.ready() == false)
+  {
+    ;
+  }
+  while (qwiicMotorDriver2.busy())
+  {
+    ;
+  }
+  qwiicMotorDriver2.enable();
+  Serial.println("Found Qwiic Motor Driver 2.");
 
   pinMode(MQTT_CONNECTED_PIN, OUTPUT);
 
@@ -130,6 +154,7 @@ void setup() {
   reverserController.Setup();
   headlightsController.Setup();
   cablightsController.Setup();
+  throttleController.Setup();
   bellController.Setup();
   hornController.Setup();
 
