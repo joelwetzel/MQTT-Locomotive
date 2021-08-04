@@ -16,6 +16,7 @@ void MqttHandler::subscribeToLoco(String roadName)
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/masterswitch").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/engineon").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/reverser").c_str());
+  _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/throttle").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/headlights").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/cablights").c_str());
   _mqttClient.subscribe(("locomotives/" + roadName + "/attributes/bell").c_str());
@@ -96,6 +97,22 @@ void MqttHandler::Setup()
         int reverser = intPayload;
 
         _locoStateCache.SetReverserFor(String(roadName), reverser);
+      }
+    }
+    else if (strTopic.endsWith("/throttle"))
+    {
+      MatchState ms;
+      ms.Target((char*)strTopic.c_str());
+
+      char result = ms.Match("locomotives\/([a-zA-Z0-9]+)\/attributes\/reverser\0", 0);
+
+      if (result == REGEXP_MATCHED && ms.level == 1)    // Matched and one captured match.
+      {
+        char buf [100];
+        char *roadName = ms.GetCapture(buf, 0);
+        float throttle = floatPayload;
+
+        _locoStateCache.SetThrottleFor(String(roadName), throttle);
       }
     }
     else if (strTopic.endsWith("/headlights"))
@@ -332,6 +349,17 @@ void MqttHandler::SendReverserFor(String roadname, int value)
   }
 
   publish((String("locomotives/") + roadname + "/commands/reverser").c_str(), value);
+}
+
+
+void MqttHandler::SendThrottleFor(String roadname, float value)
+{
+  if (roadname.length() == 0)
+  {
+    return;
+  }
+
+  publish((String("locomotives/") + roadname + "/commands/throttle").c_str(), value);
 }
 
 

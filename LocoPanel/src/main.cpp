@@ -52,7 +52,7 @@ EngineOnController engineOnController(mqttHandler, qwiicGpio1);
 ReverserController reverserController(mqttHandler, qwiicAdc, qwiicMotorDriver1);
 HeadlightsController headlightsController(mqttHandler, qwiicAdc, qwiicMotorDriver1);
 CablightsController cablightsController(mqttHandler, qwiicGpio1);
-ThrottleController throttleController(mqttHandler, qwiicMotorDriver2);
+ThrottleController throttleController(mqttHandler, qwiicAdc, qwiicMotorDriver2);
 BellController bellController(mqttHandler, qwiicGpio1);
 HornController hornController(mqttHandler, qwiicGpio2);
 

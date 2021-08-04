@@ -83,6 +83,31 @@ void LocoStateCache::SetReverserFor(String roadName, int value)
     cachedStates.push_back(newState);
 }
 
+void LocoStateCache::SetThrottleFor(String roadName, float value)
+{
+    if (value < 0.0 ||
+        value > 100.0)
+    {
+        return;
+    }
+
+    for (int i = 0; i < cachedStates.size(); i++)
+    {
+        if (cachedStates[i].RoadName == roadName)
+        {
+            cachedStates[i].Throttle = value;
+            return;
+        }
+    }
+
+    // If no match, add a new LocoState to the cache.
+    LocoState newState;
+    newState.RoadName = roadName;
+    newState.Throttle = value;
+
+    cachedStates.push_back(newState);
+}
+
 void LocoStateCache::SetHeadlightsFor(String roadName, int value)
 {
     if (value != 0 &&

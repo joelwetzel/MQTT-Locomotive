@@ -11,29 +11,29 @@
 #include <SCMD.h>
 #include <SCMD_config.h>
 
-#define THROTTLE_ADC_PIN -1
+#define THROTTLE_ADC_PIN 2
 #define THROTTLE_MOTOR_NUM 0
 
 #define THROTTLE_MAX_VOLTAGE_READING 1660.0
 
-#define THROTTLE_UP 1
-#define THROTTLE_DOWN 0
+#define THROTTLE_UP 0
+#define THROTTLE_DOWN 1
 
 class ThrottleController
 {
     MqttHandler &_mqttHandler;
+    ADS1015 &_qwiicAdc;
     SCMD &_qwiicMotorDriver;
 
-    float lastPercentage;
+    float lastThrottle;
+    float lastSentThrottle;
 
     ControllerMode currentThrottleMode;
 
     String currentLocoRoadName;
 
-    int counter;
-
 public:
-    ThrottleController(MqttHandler &mqttHandler, SCMD &qwiicMotorDriver);
+    ThrottleController(MqttHandler &mqttHandler, ADS1015 &qwiicAdc, SCMD &qwiicMotorDriver);
 
     void Setup();
     void ProcessStep(LocoState currentLocoState);

@@ -9,6 +9,7 @@ struct LocoState
     bool MasterSwitch;
     bool EngineOn;
     int Reverser;
+    float Throttle;
     int Headlights;
     bool Cablights;
     bool Bell;
@@ -20,6 +21,7 @@ public:
         MasterSwitch = false;
         EngineOn = false;
         Reverser = 0;
+        Throttle = 0.0;
         Headlights = 0;
         Cablights = false;
         Bell = false;

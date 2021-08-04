@@ -29,14 +29,7 @@ class MqttHandler
 
     bool boot = true;
 
-    // bool _lastEngineOn;
-    // float _lastEngineRpms;
-    // int _lastReverser;
-
     int _publishCounter;
-
-    // String _masterMasterSwitchTopic;
-    // String _masterEngineOnTopic;
 
     void setup_wifi();
     void reconnect();
@@ -56,6 +49,7 @@ public:
     void SendMasterSwitchFor(String roadname, bool value);
     void SendEngineOnFor(String roadname, bool value);
     void SendReverserFor(String roadname, int value);
+    void SendThrottleFor(String roadname, float value);
     void SendHeadlightsFor(String roadname, int value);
     void SendCablightsFor(String roadname, bool value);
     void SendBellFor(String roadname, bool value);
