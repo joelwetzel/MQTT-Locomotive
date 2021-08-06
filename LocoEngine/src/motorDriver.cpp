@@ -36,15 +36,18 @@ void MotorDriver::SetMotorSpeed(float percent)
     digitalWrite(MOTORBACKWARD_PIN, LOW);
  }
   else {
+    int motorSpeed = (MIN_SPEED_PWM + fabs(cappedPercent) / 100.0 * (MAX_SPEED_PWM - MIN_SPEED_PWM));
+    //Serial.printf("speed: %d\n", motorSpeed);
+    
     if (cappedPercent > 0.0)
     {
-      analogWrite(MOTORFORWARD_PIN, (MIN_SPEED_PWM + fabs(cappedPercent) / 100.0 * (MAX_SPEED_PWM - MIN_SPEED_PWM)));
+      analogWrite(MOTORFORWARD_PIN, motorSpeed);
       digitalWrite(MOTORBACKWARD_PIN, LOW);
     }
     else
     {
       digitalWrite(MOTORFORWARD_PIN, LOW);
-      analogWrite(MOTORBACKWARD_PIN, (MIN_SPEED_PWM + fabs(cappedPercent) / 100.0 * (MAX_SPEED_PWM - MIN_SPEED_PWM)));
+      analogWrite(MOTORBACKWARD_PIN, motorSpeed);
     }
   }
 }
