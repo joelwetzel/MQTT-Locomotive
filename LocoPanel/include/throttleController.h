@@ -28,6 +28,7 @@ class ThrottleController
     float lastThrottle;
     float lastSentThrottle;
 
+    int resetCounter;
     ControllerMode currentThrottleMode;
 
     String currentLocoRoadName;

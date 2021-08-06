@@ -164,7 +164,7 @@ void setup() {
 
   nextLocoButtonController.Setup();
 
-  timer.setInterval(30, processStep);
+  timer.setInterval(15, processStep);
 }
 
 

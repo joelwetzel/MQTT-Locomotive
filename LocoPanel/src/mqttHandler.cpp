@@ -104,7 +104,7 @@ void MqttHandler::Setup()
       MatchState ms;
       ms.Target((char*)strTopic.c_str());
 
-      char result = ms.Match("locomotives\/([a-zA-Z0-9]+)\/attributes\/reverser\0", 0);
+      char result = ms.Match("locomotives\/([a-zA-Z0-9]+)\/attributes\/throttle\0", 0);
 
       if (result == REGEXP_MATCHED && ms.level == 1)    // Matched and one captured match.
       {

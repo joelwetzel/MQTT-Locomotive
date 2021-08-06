@@ -307,6 +307,11 @@ void MqttHandler::ProcessStep()
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", _batteryDriver.GetMasterSwitch());
     }
 
+    if (boot || _publishCounter % 183 == 0)
+    {
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/throttle", _ptrControlModel->GetThrottle());
+    }
+
     bool engineOn = _ptrControlModel->GetEngineOn();
     if ((engineOn != _lastEngineOn || _publishCounter % 211 == 0) || boot)
     {
