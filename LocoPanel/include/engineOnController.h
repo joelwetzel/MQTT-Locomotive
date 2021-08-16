@@ -6,9 +6,9 @@
 
 #include <SparkFun_TCA9534.h>
 
-#define ENGINE_ON_ON_BUTTON_PIN 3
-#define ENGINE_ON_OFF_BUTTON_PIN 1
-#define ENGINE_ON_LED_PIN 2
+#define ENGINE_ON_ON_BUTTON_PIN 4
+#define ENGINE_ON_OFF_BUTTON_PIN 6
+#define ENGINE_ON_LED_PIN 5
 
 class EngineOnController
 {

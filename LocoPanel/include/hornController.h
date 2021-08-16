@@ -6,8 +6,8 @@
 
 #include <SparkFun_TCA9534.h>
 
-#define HORN_BUTTON_PIN 4
-#define HORN_LED_PIN 5
+#define HORN_BUTTON_PIN 3
+#define HORN_LED_PIN 2
 
 class HornController
 {

@@ -48,13 +48,13 @@ MqttHandler mqttHandler(mqttClient, locoList, locoStateCache, locoDisplayControl
 
 NextLocoButtonController nextLocoButtonController(locoDisplayController);
 MasterSwitchController masterSwitchController(mqttHandler, qwiicGpio2);
-EngineOnController engineOnController(mqttHandler, qwiicGpio1);
+EngineOnController engineOnController(mqttHandler, qwiicGpio2);
 ReverserController reverserController(mqttHandler, qwiicAdc, qwiicMotorDriver1);
 HeadlightsController headlightsController(mqttHandler, qwiicAdc, qwiicMotorDriver1);
 CablightsController cablightsController(mqttHandler, qwiicGpio1);
 ThrottleController throttleController(mqttHandler, qwiicAdc, qwiicMotorDriver2);
 BellController bellController(mqttHandler, qwiicGpio1);
-HornController hornController(mqttHandler, qwiicGpio2);
+HornController hornController(mqttHandler, qwiicGpio1);
 
 /*****************  END GLOBALS SECTION ***********************************/
 
