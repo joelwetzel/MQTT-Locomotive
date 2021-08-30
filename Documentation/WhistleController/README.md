@@ -1,0 +1,3 @@
+The whistle controller is a board that can be inserted in the ground path of an off-the-shelf conventional sound unit.  It listens for the same MQTT commands as the LocoSounds board, but instead of playing its own sounds, it controls the voltages going into a conventional sound unit, and lets that unit generate the sounds.
+
+This means it can be used with Lionel TrainSounds, Williams TrueBlast, or others.
