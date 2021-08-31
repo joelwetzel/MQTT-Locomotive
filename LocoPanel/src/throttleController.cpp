@@ -73,13 +73,37 @@ void ThrottleController::ProcessStep(LocoState currentLocoState)
     {
         if (fabs(measuredThrottle - lastSentThrottle) > 0.5)
         {
-            Serial.printf("%f\n", measuredThrottle);
+            //Serial.printf("%f\n", measuredThrottle);
             _mqttHandler.SendThrottleFor(currentLocoRoadName, measuredThrottle);
             lastSentThrottle = measuredThrottle;
+        }
+
+        // Resistance against movement
+        float delta = measuredThrottle - lastThrottle;
+        delta = constrain(delta, -20, 20);
+        //Serial.printf("%f\n", delta);
+
+        float resistingPower = map(fabs(delta), 0, 20, 0, 255);
+        resistingPower = 0;
+        //Serial.printf("%f\n", resistingPower);
+
+        if (delta > 0.1)
+        {
+            _qwiicMotorDriver.setDrive(THROTTLE_MOTOR_NUM, THROTTLE_DOWN, resistingPower);
+        }
+        else if (delta < -0.1) 
+        {
+            _qwiicMotorDriver.setDrive(THROTTLE_MOTOR_NUM, THROTTLE_UP, resistingPower);
+        }
+        else
+        {
+            _qwiicMotorDriver.setDrive(THROTTLE_MOTOR_NUM, THROTTLE_UP, 0);
         }
     }
     else if (currentThrottleMode == ControllerMode::Unknown)
     {
         ;   // Do nothing
     }
+
+    lastThrottle = measuredThrottle;
 }
