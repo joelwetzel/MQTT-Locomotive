@@ -54,6 +54,8 @@ SoundController soundController(batteryDriver);
 
 MqttHandler mqttHandler(mqttClient, ptrControlModel, lightingDriver, soundController, batteryDriver, smokeDriver, tachDriver, pidController);
 
+float _previousMotorSpeed;
+
 /*****************  END GLOBALS SECTION ***********************************/
 
 void changeControlModel(IControlModel* newPtr)
@@ -76,7 +78,9 @@ void processStep()
   float measuredWheelRpms = tachDriver.GetWheelRpm();
   pidController.Update(desiredWheelRpms, measuredWheelRpms, micros());
   float controlledMotorPercent = pidController.GetControlValue();
+  controlledMotorPercent = _previousMotorSpeed + (controlledMotorPercent - _previousMotorSpeed) / 3.0;
   motorDriver.SetMotorSpeed(controlledMotorPercent * ptrControlModel->GetDirectionOfTravel());
+  _previousMotorSpeed = controlledMotorPercent;
 #endif
 
   smokeDriver.SetSmokePercent(ptrControlModel->GetSmokePercent());
@@ -90,6 +94,8 @@ void processStep()
 
 void setup()
 {
+  _previousMotorSpeed = 0.0;
+
   Serial.begin(9600);
 
   pinMode(MQTT_CONNECTED_PIN, OUTPUT);

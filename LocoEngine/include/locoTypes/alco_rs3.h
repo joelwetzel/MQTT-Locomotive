@@ -35,11 +35,11 @@
 #define SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE            4.77
 #define SPEEDPERCENT_TO_WHEEL_RPMS_INTERCEPT        96.0
 
-// ****************************************************************
-// * PID Controller configuration
-// ****************************************************************
-#define P_FACTOR            1.04 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
-#define I_FACTOR            0.010 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
+// *******************************************************************************************
+// * PID Controller configuration - for all factors, higher means more control for that term.
+// *******************************************************************************************
+#define P_FACTOR            1.10 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
+#define I_FACTOR            0.005 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
 #define D_FACTOR            0.0
 #define MAX_I_TERM          70.0
 #define MIN_I_TERM          -70.0

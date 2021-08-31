@@ -6,8 +6,8 @@
 
 #include <SparkFun_TCA9534.h>
 
-#define BELL_BUTTON_PIN 7
-#define BELL_LED_PIN 6
+#define BELL_BUTTON_PIN 0
+#define BELL_LED_PIN 1
 
 class BellController
 {
