@@ -3,6 +3,7 @@
 AudioDriver::AudioDriver()
 {
     engineRpms = 0.0;
+    filteredEngineRpms = 0.0;
 
     bellOn = false;
     hornOn = false;
@@ -65,8 +66,10 @@ void AudioDriver::Setup()
 
 
 void AudioDriver::Loop()
-{    
-    bool engineOn = engineRpms >= ENGINE_RPM_IDLE - 1.0;
+{
+    filteredEngineRpms += (engineRpms - filteredEngineRpms) / 10.0;
+
+    bool engineOn = filteredEngineRpms >= ENGINE_RPM_IDLE - 1.0;
 
     // Start the engine noise if necessary.
     if (engineOn && !wavs[ENGINE_CHANNEL]->isRunning())
@@ -76,7 +79,7 @@ void AudioDriver::Loop()
     }
 
     // Set engine volume based on rpms
-    float enginePercent = (engineRpms - ENGINE_RPM_IDLE) / (ENGINE_RPM_MAX - ENGINE_RPM_IDLE) * 100.0;
+    float enginePercent = (filteredEngineRpms - ENGINE_RPM_IDLE) / (ENGINE_RPM_MAX - ENGINE_RPM_IDLE) * 100.0;
     if (enginePercent < 0.0)
     { enginePercent = 0.0; }
     if (enginePercent > 100.0)
@@ -101,10 +104,10 @@ void AudioDriver::Loop()
             if (engineOn)
             {
                 // Set the engine wav file based on rpms
-                if (engineRpms < ENGINE_RPM_1) {
+                if (filteredEngineRpms < ENGINE_RPM_1) {
                     files[ENGINE_CHANNEL] = new AudioFileSourceLittleFS(ENGINE_WAV_LOW);
                 }
-                else if (engineRpms < ENGINE_RPM_2) {
+                else if (filteredEngineRpms < ENGINE_RPM_2) {
                     files[ENGINE_CHANNEL] = new AudioFileSourceLittleFS(ENGINE_WAV_MID);
                 }
                 else {

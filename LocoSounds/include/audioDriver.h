@@ -24,6 +24,7 @@
 class AudioDriver
 {
     float engineRpms;
+    float filteredEngineRpms;
 
     bool bellOn;
     bool hornOn;
