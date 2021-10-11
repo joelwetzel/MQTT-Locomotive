@@ -1,5 +1,7 @@
 ## Remove the Shell
 
+This one has a conventional E-Unit.  No sound system.  Incandescent headlights and cab light.
+
 ![Remove the shell](Images/removeShell.jpeg)
 
 ---
