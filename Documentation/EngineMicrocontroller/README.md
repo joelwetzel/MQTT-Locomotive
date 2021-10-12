@@ -36,3 +36,9 @@ The firmware is in the /LocoEngine folder of this repo.
 In the actual locomotives, I use the PCB hat, but this breadboard diagram is useful for showing the external wiring and connections.  (Such as to the motor drivers.)
 
 ![Fritzing breadboard for Engine Hat](Images/EngineHatBreadboard.png)
+
+---
+
+## Assembled
+
+![Engine hat assembled](Images/EngineHatAssembled.png)
