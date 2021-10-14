@@ -16,7 +16,7 @@ This board takes track power (~16V AC) as input.  It then:
 
 ## Schematic
 
-Note: The pim labels on the buck converter in the lower-right are wrong.  Ignore them and wire up as shown in the PCB and Breadboard diagrams.
+Note: The pin labels on the buck converter in the lower-right are wrong.  Ignore them and wire up as shown in the PCB and Breadboard diagrams.
 
 ![Schematic](Images/PowerSupplySchematic.png)
 

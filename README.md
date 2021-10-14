@@ -2,7 +2,7 @@
 
 **Topics**
 
-[Retrofit a conventional locomotive](Documentation/Retrofit%20a%20Locomotive/README.md)
+[Retrofit a conventional locomotive](Documentation/RetrofitALocomotive/README.md)
 
 [Engine Microcontroller](Documentation/EngineMicrocontroller/README.md)
 
@@ -12,4 +12,6 @@
 
 [Whistle Controller](Documentation/WhistleController/README.md)
 
-[Power Supply](Documentation/Power%20Supply/README.md)
+[Power Supply](Documentation/PowerSupply/README.md)
+
+[Control Panel](Documentation/ControlPanel/README.md)

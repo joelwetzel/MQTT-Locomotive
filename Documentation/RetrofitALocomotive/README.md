@@ -56,14 +56,18 @@ It's important to solder a resistor in series.  I use 100ohm for the cab light, 
 
 ---
 
-## Program the engine unit
+## Assemble and program the engine microcontroller and hat
 
-1. Build and upload the engine firmware.
+1. Assemble the Wemos D1 Mini and the Engine Hat.  The Engine Microcontroller is detailed [here](../EngineMicrocontroller/README.md).
+2. Build and upload the engine firmware.
+
+![Mount the engine unit](Images/engineUnitMounted.jpeg)
 
 ---
 
-## Program and mount the sound unit
+## Assemble and program the sound microcontroller and hat
 
+1. Assemble the Wemos D1 Mini and the Sound Hat.  The Sound Hat is detailed [here](../SoundMicrocontroller/README.md).
 1. Build and upload the filesystem image.  It has the sound files.
 2. Build and upload the sound firmware.
 3. Test the sound.  You'll have both the engine and the sound ESP8266's still outside the chassis at this point.
@@ -73,4 +77,6 @@ It's important to solder a resistor in series.  I use 100ohm for the cab light, 
 
 ---
 
+## Assemble the Power Supply PCB
 
+The power supply is detailed [here](../PowerSupply/README.md).
