@@ -14,10 +14,12 @@
 #define THROTTLE_ADC_PIN 2
 #define THROTTLE_MOTOR_NUM 0
 
-#define THROTTLE_MAX_VOLTAGE_READING 1660.0
+#define THROTTLE_MAX_VOLTAGE_READING 1641.0
 
 #define THROTTLE_UP 0
 #define THROTTLE_DOWN 1
+
+#define POWER_LEVELS 8
 
 class ThrottleController
 {
@@ -25,13 +27,17 @@ class ThrottleController
     ADS1015 &_qwiicAdc;
     SCMD &_qwiicMotorDriver;
 
-    float lastThrottle;
-    float lastSentThrottle;
+    int lastKnownDetent;
 
     int resetCounter;
     ControllerMode currentThrottleMode;
 
     String currentLocoRoadName;
+
+    float measureThrottle();
+
+    int convertThrottleToPowerDetent(float throttle);
+    float convertPowerDetentToThrottle(int powerDetent);
 
 public:
     ThrottleController(MqttHandler &mqttHandler, ADS1015 &qwiicAdc, SCMD &qwiicMotorDriver);
