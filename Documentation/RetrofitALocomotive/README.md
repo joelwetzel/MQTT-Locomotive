@@ -40,7 +40,7 @@ Here I have painted the trucks, and reinstalled them.  I have also moved most of
 
 ## Power the motors
 
-Install the motor driver and wire the truck motors to it.  Make sure to have lots of slack in these wires, because the trucks will turn.
+Install the motor driver and wire the truck motors to it.  Make sure to have lots of slack in these wires, because the trucks will turn and you don't want it to bind.
 
 ![Power the motors](Images/wireMotorPower.jpeg)
 
@@ -53,6 +53,8 @@ This Alco RS-3 has dual headlights and a cab light.  I convert them to LEDs, and
 It's important to solder a resistor in series.  I use 100ohm for the cab light, and 47ohm for the headlights.
 
 ![LED lights](Images/ledLights.jpeg)
+
+You can reinstall them right away.
 
 ---
 
@@ -80,3 +82,17 @@ It's important to solder a resistor in series.  I use 100ohm for the cab light, 
 ## Assemble the Power Supply PCB
 
 The power supply is detailed [here](../PowerSupply/README.md).
+
+---
+
+** Get power from the trucks
+
+Wire the truck power wires together and onto a Dupont connector that will go up to the power supply board.  Make sure to leave lots of slack.  The trucks will turn and you don't want it to bind.
+
+I use twist connectors instead of soldered joints, because you might need to drop the trucks from the frame, while doing future maintenance.
+
+![Wires from trucks](Images/wireTruckPower.png)
+
+---
+
+
