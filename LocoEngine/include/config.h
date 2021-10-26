@@ -32,10 +32,20 @@
 
 #define ALCO_RS3                1
 
+#define UP1292                  1
+#define UP8805                  2
+
 #if LOCO_TYPE == ALCO_RS3
     #include "locoTypes/alco_rs3.h"
 #endif
 
+#if ROAD_NUMBER == UP1292
+    #include "roadNumbers/up1292.h"
+#endif
+
+#if ROAD_NUMBER == UP8805
+    #include "roadNumbers/up8805.h"
+#endif
 
 
 #endif
