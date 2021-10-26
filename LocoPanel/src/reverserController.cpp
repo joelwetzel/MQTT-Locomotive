@@ -107,7 +107,12 @@ void ReverserController::ProcessStep(LocoState currentLocoState)
         {
             newReverser = closestDetentsReverser;       // We arrived at a detent
             _qwiicMotorDriver.setDrive(REVERSER_MOTOR_NUM, REVERSER_CLOCKWISE, 0);
-            _mqttHandler.SendReverserFor(currentLocoState.RoadName, newReverser);
+
+            if (newReverser != lastKnownReverser)
+            {
+                _mqttHandler.SendReverserFor(currentLocoState.RoadName, newReverser);
+                lastKnownReverser = newReverser;
+            }
         }
         else if (percentage > percentageForClosestDetent)       // Snap to the closest detent
         {

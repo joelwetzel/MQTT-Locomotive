@@ -121,7 +121,12 @@ void HeadlightsController::ProcessStep(LocoState currentLocoState)
         {
             newHeadlights = closestDetentsHeadlights;       // We arrived at a detent
             _qwiicMotorDriver.setDrive(HEADLIGHTS_MOTOR_NUM, HEADLIGHTS_CLOCKWISE, 0);
-            _mqttHandler.SendHeadlightsFor(currentLocoState.RoadName, newHeadlights);
+
+            if (newHeadlights != lastKnownHeadlights)
+            {
+                _mqttHandler.SendHeadlightsFor(currentLocoState.RoadName, newHeadlights);
+                lastKnownHeadlights = newHeadlights;
+            }
         }
         else if (percentage > percentageForClosestDetent)       // Snap to the closest detent
         {
