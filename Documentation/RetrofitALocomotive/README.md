@@ -46,6 +46,14 @@ Install the motor driver and wire the truck motors to it.  Make sure to have lot
 
 ---
 
+## Power the smokestack
+
+The motor driver for the smokestack needs an extra jumper soldered in on the back, from pin 1 to pin 4.
+
+TODO
+
+---
+
 ## Prepare the LED lights
 
 This Alco RS-3 has dual headlights and a cab light.  I convert them to LEDs, and use heatshrink wrap to clean up the packaging.
