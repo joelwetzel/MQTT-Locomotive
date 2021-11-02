@@ -106,13 +106,14 @@ void ThrottleController::ProcessStep(LocoState currentLocoState)
         int closestDetent = convertThrottleToPowerDetent(measuredThrottle);
         float throttleOfClosestDetent = convertPowerDetentToThrottle(closestDetent);
 
-//        Serial.printf("%f, %d, %f \n", measuredThrottle, closestPowerLevel, throttleOfClosestPowerLevel);
+        //Serial.printf("%f, %d, %f \n", measuredThrottle, closestDetent, throttleOfClosestDetent);
         
         // Are we close enough to the detent to be "there"?
         float offset = fabs(measuredThrottle - throttleOfClosestDetent);
         int detentPower = map((int)offset, 0, 6, 220, 235);
 
-        if (offset < 1.5)
+        if (offset < 2.0 ||
+            (closestDetent == POWER_LEVELS && measuredThrottle > 96.0))
         {
             // We're at a detent
             _qwiicMotorDriver.setDrive(THROTTLE_MOTOR_NUM, THROTTLE_UP, 0);

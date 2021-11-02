@@ -19,8 +19,6 @@
 #define MQTTHANDLER_H
 
 
-
-
 class MqttHandler
 {
     PubSubClient &_mqttClient;
@@ -40,7 +38,7 @@ class MqttHandler
     const int mqtt_port = USER_MQTT_PORT;
     const char *mqtt_device_network_id = USER_DEVICE_NETWORK_ID; 
 
-    bool boot = true;
+    bool boot;
 
     int _lastControlModelId;
 

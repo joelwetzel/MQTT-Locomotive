@@ -9,9 +9,6 @@
 #define SIMULATORCONTROLMODEL_H
 
 
-#define ROLLING_RESISTANCE_FACTOR           0.0012
-#define AIR_RESISTANCE_FACTOR               0.0000012
-
 class SimulatorControlModel : public IControlModel
 {
     BatteryDriver &_batteryDriver;

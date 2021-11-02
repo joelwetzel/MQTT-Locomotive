@@ -33,7 +33,7 @@ void MotorDriver::SetMotorSpeed(float percent)
     cappedPercent = 100.0;
   }
 
-  if (cappedPercent < 0.05 && cappedPercent > -0.05) {
+  if (cappedPercent < 0.01 && cappedPercent > -0.01) {
     digitalWrite(MOTORFORWARD_PIN, LOW);
     digitalWrite(MOTORBACKWARD_PIN, LOW);
  }

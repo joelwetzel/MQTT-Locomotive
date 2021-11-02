@@ -55,7 +55,7 @@ void AudioDriver::Setup()
 
   // Use channel 1 for the horn sound.
   stubs[HORN_CHANNEL] = mixer->NewInput();
-  stubs[HORN_CHANNEL]->SetGain(0.8);        // 0.8 when running on desktop
+  stubs[HORN_CHANNEL]->SetGain(1.0);        // 0.8 when running on desktop
   wavs[HORN_CHANNEL] = new AudioGeneratorWAV();
 
   // Use channel 2 for the bell sound
