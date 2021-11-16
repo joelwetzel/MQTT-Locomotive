@@ -4,6 +4,7 @@ MuSlaveControlModel::MuSlaveControlModel(BatteryDriver &batteryDriver)
     : _batteryDriver(batteryDriver)
 {
     _reverserDirection = 0;
+    _directionOfTravel = 0;
 
     _engineOn = false;
     _engineRpms = 0.0;
@@ -83,6 +84,7 @@ float MuSlaveControlModel::GetBrake()
 void MuSlaveControlModel::SetReverser(int direction)
 {
     _reverserDirection = direction;
+    _directionOfTravel = _reverserDirection;
 }
 
 int MuSlaveControlModel::GetReverser()
@@ -92,7 +94,7 @@ int MuSlaveControlModel::GetReverser()
 
 int MuSlaveControlModel::GetDirectionOfTravel()
 {
-    return 0;
+    return _directionOfTravel;
 }
 
 void MuSlaveControlModel::OverrideEngineRpms(float rpms)

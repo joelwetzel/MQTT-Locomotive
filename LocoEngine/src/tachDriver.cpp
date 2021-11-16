@@ -85,7 +85,8 @@ void TachDriver::ProcessStep()
 
         if (counterSinceReceivedPulse > 10)
         {
-            lastPulseDelta = micros() - lastPulseMicros + counterSinceReceivedPulse * 150;
+          // This was an adjustment that tried to help at low speeds.  It worked in the TachCalibrator, but causes problems on real locos.
+            //lastPulseDelta = micros() - lastPulseMicros + counterSinceReceivedPulse * 150;
         }
     }
 
@@ -111,7 +112,7 @@ void TachDriver::ProcessStep()
       rpm = rpm + LOW_PASS_FILTER_ALPHA * (unfilteredRpm - rpm);
     }
 
-    if (rpm < 0.0 || isnan(rpm) || !hasEverReceivedPulse || counterSinceReceivedPulse > 33)
+    if (rpm < 0.0 || isnan(rpm) || !hasEverReceivedPulse || counterSinceReceivedPulse > 166)
     {
         rpm = 0.0;
     }

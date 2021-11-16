@@ -59,7 +59,7 @@ float SimulatorControlModel::GetSmokePercent()
 
 float SimulatorControlModel::GetEstimatedWheelRpms()
 {
-    if (_speedPercent > 0.0)
+    if (_speedPercent > 0.01)
     {
         return _speedPercent * SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE + SPEEDPERCENT_TO_WHEEL_RPMS_INTERCEPT;
     }

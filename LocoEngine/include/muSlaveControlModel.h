@@ -14,6 +14,7 @@ class MuSlaveControlModel : public IControlModel
     BatteryDriver &_batteryDriver;
 
     int _reverserDirection;
+    int _directionOfTravel;
 
     bool _engineOn;
     float _engineRpms;

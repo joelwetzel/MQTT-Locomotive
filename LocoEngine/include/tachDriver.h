@@ -9,7 +9,7 @@
 #define LOOP_DELAY                10
 #define NUM_MAGNETS               4.0
 #define LOW_PASS_FILTER_ALPHA     0.075
-#define MAX_NONANOMALOUS_JUMP     200
+#define MAX_NONANOMALOUS_JUMP     100
 #define MAX_SANE_RPM              1000
 
 
