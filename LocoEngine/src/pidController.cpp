@@ -41,7 +41,14 @@ void PidController::Update(float setpoint, float processVariableValue, unsigned 
     // P term is proportional to the error.
     _pTerm = P_FACTOR * error;
     
-    _iTerm += I_FACTOR * error; // * ((float)dt / 1000.0 / PHYSICS_DELTAT);
+    if (error > 0.0)
+    {
+        _iTerm += I_FACTOR_PLUS * error; // * ((float)dt / 1000.0 / PHYSICS_DELTAT);
+    }
+    else
+    {
+        _iTerm += I_FACTOR_MINUS * error;
+    }
 
     // Clamp the I term.
     if (_iTerm > MAX_I_TERM)
@@ -68,7 +75,7 @@ void PidController::Update(float setpoint, float processVariableValue, unsigned 
         _dTerm = 0.0;
     }   
 
-    _controlValue = _bTerm + _pTerm + _iTerm + _dTerm;
+    _controlValue = /*_bTerm +*/ _pTerm + _iTerm + _dTerm;
 
     // Clamp the motor percentage.
     if (_controlValue < 0.0)
@@ -120,6 +127,10 @@ float PidController::GetDTerm()
     return _dTerm;
 }
 
+float PidController::GetError()
+{
+    return _previousError;
+}
 
 float PidController::GetControlValue()
 {

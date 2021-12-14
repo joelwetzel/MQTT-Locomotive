@@ -5,7 +5,7 @@
 // ****************************************************************
 // * Simulator configuration
 // ****************************************************************
-#define ROLLING_RESISTANCE_FACTOR           0.0014
+#define ROLLING_RESISTANCE_FACTOR           0.0012
 #define AIR_RESISTANCE_FACTOR               0.0000003
 #define WHEEL_RPM_TO_SCALE_MPH              0.135
 
@@ -39,11 +39,12 @@
 // *******************************************************************************************
 // * PID Controller configuration - for all factors, higher means more control for that term.
 // *******************************************************************************************
-#define P_FACTOR            1.10 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
-#define I_FACTOR            0.005 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
-#define D_FACTOR            0.0
-#define MAX_I_TERM          70.0
-#define MIN_I_TERM          -70.0
+#define P_FACTOR            0.15 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
+#define I_FACTOR_PLUS       0.005 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
+#define I_FACTOR_MINUS      4.0 * I_FACTOR_PLUS
+#define D_FACTOR            0.0 / SPEEDPERCENT_TO_WHEEL_RPMS_SLOPE
+#define MAX_I_TERM          100.0
+#define MIN_I_TERM          -100.0
 #define MIN_ACTIVE_CONTROL_VALUE    0.3
 
 #endif

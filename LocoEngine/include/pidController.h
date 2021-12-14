@@ -26,6 +26,7 @@ public:
     float GetITerm();
     float GetDTerm();
 
+    float GetError();
     float GetControlValue();
 };
 
