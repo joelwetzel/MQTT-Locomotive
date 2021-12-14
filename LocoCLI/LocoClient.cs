@@ -105,6 +105,25 @@ namespace LocoCLI
         }
 
 
+        public async Task SendRepublishAsync(string roadNumber, CancellationToken token)
+        {
+            if (!_isConnected)
+            {
+                throw new InvalidOperationException("Not connected to MQTT.");
+            }
+
+            Log?.Invoke(this, new LogArgs("Sending republish..."));
+
+            var message = new MqttApplicationMessageBuilder()
+                            .WithTopic($"locomotives/{roadNumber}/commands/republish")
+                            .WithPayload("1")
+                            .Build();
+
+            await _mqttClient.PublishAsync(message, token);
+            Log?.Invoke(this, new LogArgs("Republish sent."));
+        }
+
+
         public async Task ListenAsync(string roadNumber, string attribute, CancellationToken token)
         {
             if (!_isConnected)

@@ -39,6 +39,7 @@ class MqttHandler
     const char *mqtt_device_network_id = USER_DEVICE_NETWORK_ID; 
 
     bool boot;
+    bool republish;
 
     int _lastControlModelId;
 

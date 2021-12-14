@@ -6,7 +6,8 @@ MqttHandler::MqttHandler(PubSubClient &mqttClient, IControlModel* ptrControlMode
     : _mqttClient(mqttClient), _ptrControlModel(ptrControlModel), _lightingDriver(lightingDriver), _soundController(soundController), _batteryDriver(batteryDriver), _smokeDriver(smokeDriver), _tachDriver(tachDriver), _pidController(pidController)
 {
     boot = true;
-    
+    republish = false;
+
     _lastControlModelId = -1;
 
     _lastEngineOn = false;
@@ -154,6 +155,10 @@ void MqttHandler::Setup()
 
             ESP.restart();
         }
+        else if (strTopic == "locomotives/"USER_DEVICE_NETWORK_ID"/commands/republish")
+        {
+            republish = true;
+        }
     });
 }
 
@@ -244,6 +249,7 @@ void MqttHandler::reconnect()
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/setcontrolmodel");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/lashup");
         _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/reset");
+        _mqttClient.subscribe("locomotives/"USER_DEVICE_NETWORK_ID"/commands/republish");
       } 
       else 
       {
@@ -305,39 +311,39 @@ void MqttHandler::ProcessStep()
     //   - Or every 30-60 seconds
 
 #ifdef PUBLISH_CONTROL_MODEL
-    if (boot || _publishCounter % 156 == 0)
+    if (boot || republish || _publishCounter % 156 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/masterswitch", _batteryDriver.GetMasterSwitch());
     }
 
-    if (boot || _publishCounter % 183 == 0)
+    if (boot || republish || _publishCounter % 183 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/throttle", _ptrControlModel->GetThrottle());
     }
 
     bool engineOn = _ptrControlModel->GetEngineOn();
-    if ((engineOn != _lastEngineOn || _publishCounter % 211 == 0) || boot)
+    if ((engineOn != _lastEngineOn || _publishCounter % 211 == 0) || boot || republish)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/engineon", engineOn);
         _lastEngineOn = engineOn;
     }
 
     int reverser = _ptrControlModel->GetReverser();
-    if ((reverser != _lastReverser) || boot || _publishCounter % 550 == 0)
+    if ((reverser != _lastReverser) || boot || republish || _publishCounter % 550 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/reverser", reverser);
         _lastReverser = reverser;
     }
 
     int headlights = _lightingDriver.GetHeadlights();
-    if ((headlights != _lastHeadlights) || boot || _publishCounter % 417 == 0)
+    if ((headlights != _lastHeadlights) || boot || republish || _publishCounter % 417 == 0)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/headlights", headlights);
         _lastHeadlights = headlights;
     }
 
     bool cablights = _lightingDriver.GetCabLights();
-    if ((cablights != _lastCablights || _publishCounter % 218 == 0) || boot)
+    if ((cablights != _lastCablights || _publishCounter % 218 == 0) || boot || republish)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/cablights", cablights);
         _lastCablights = cablights;
@@ -380,24 +386,25 @@ void MqttHandler::ProcessStep()
 #ifdef PUBLISH_PID_CONTROLLER
     if (_publishCounter%23 == 0)
     {
-        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidControlValue", _pidController.GetControlValue());
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidError", _pidController.GetError());
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidBTerm", _pidController.GetBTerm());
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidPTerm", _pidController.GetPTerm());
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidITerm", _pidController.GetITerm());
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidDTerm", _pidController.GetDTerm());
+        publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/pidControlValue", _pidController.GetControlValue());
     }
 #endif
 
 #ifdef PUBLISH_SOUNDS
     bool bell = _soundController.GetBell();
-    if ((bell != _lastBell) || boot)
+    if ((bell != _lastBell) || boot || republish)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/bell", bell);
         _lastBell = bell;
     }
 
     bool horn = _soundController.GetHorn();
-    if ((horn != _lastHorn) || boot)
+    if ((horn != _lastHorn) || boot || republish)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/horn", horn);
         _lastHorn = horn;
@@ -405,29 +412,36 @@ void MqttHandler::ProcessStep()
 #endif
 
     float battery = _batteryDriver.GetVoltage();
-    if ((fabs(battery - _lastBattery) > 0.05 && _publishCounter % 50 == 0) || _publishCounter % 396 == 0)
+    if ((fabs(battery - _lastBattery) > 0.05 && _publishCounter % 50 == 0) || _publishCounter % 396 == 0 || boot || republish)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/battery", _batteryDriver.GetVoltage());
         _lastBattery = battery;
     }
 
     // Discovery protocol
-    if (_publishCounter%500 == 0)
+    if (_publishCounter%500 == 0 || boot || republish)
     {
         _mqttClient.publish("locomotives/discovery", USER_DEVICE_NETWORK_ID);
     }
 
-    if (_publishCounter == 1500)
+    if (_publishCounter == 1500 || republish)
     {
         _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/engineStatus", "OK"); 
         _publishCounter = 0;
     }
 
     int controlModelId = _ptrControlModel->GetControlModelId();
-    if (controlModelId != _lastControlModelId)
+    if (controlModelId != _lastControlModelId || boot || republish)
     {
         publish("locomotives/"USER_DEVICE_NETWORK_ID"/attributes/controlmodel", controlModelId);
         _lastControlModelId = controlModelId;
+    }
+
+    if (republish)
+    {
+        _mqttClient.publish("locomotives/"USER_DEVICE_NETWORK_ID"/engineIp", WiFi.localIP().toString().c_str());
+        republishCommands();
+        republish = false;
     }
 
     _publishCounter++;

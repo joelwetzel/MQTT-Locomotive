@@ -15,10 +15,11 @@ namespace LocoCLI
     {
         static async Task<int> Main(string[] args)
         {
-            return await CommandLine.Parser.Default.ParseArguments<ScanOptions, ResetOptions, ListenOptions, SendOptions, LashupOptions>(args)
-                    .MapResult<ScanOptions, ResetOptions, ListenOptions, SendOptions, LashupOptions, Task<int>>(
+            return await CommandLine.Parser.Default.ParseArguments<ScanOptions, ResetOptions, RepublishOptions, ListenOptions, SendOptions, LashupOptions>(args)
+                    .MapResult<ScanOptions, ResetOptions, RepublishOptions, ListenOptions, SendOptions, LashupOptions, Task<int>>(
                         (ScanOptions opts) => RunScanAndReturnExitCode(opts),
                         (ResetOptions opts) => RunResetAndReturnExitCode(opts),
+                        (RepublishOptions opts) => RunRepublishAndReturnExitCode(opts),
                         (ListenOptions opts) => RunListenAndReturnExitCode(opts),
                         (SendOptions opts) => RunSendAndReturnExitCode(opts),
                         (LashupOptions opts) => RunLashupAndReturnExitCode(opts),
@@ -74,6 +75,25 @@ namespace LocoCLI
             await locoClient.ConnectAsync(tokenSource.Token);
 
             await locoClient.SendResetAsync(opts.RoadNumber, tokenSource.Token);
+
+            return 0;
+        }
+
+
+        static async Task<int> RunRepublishAndReturnExitCode(RepublishOptions opts)
+        {
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+            var locoClient = new LocoClient();
+
+            locoClient.Log += (sender, args) =>
+            {
+                Console.WriteLine(args.Log);
+            };
+
+            await locoClient.ConnectAsync(tokenSource.Token);
+
+            await locoClient.SendRepublishAsync(opts.RoadNumber, tokenSource.Token);
 
             return 0;
         }
