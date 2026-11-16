@@ -106,7 +106,7 @@ All topics are under `locomotives/<ROADNUMBER>/`. Payloads are plain-text number
 |---|---|
 | `commands/masterswitch` | 0/1. Gates everything: engine, lights, bell, horn are forced off when 0. |
 | `commands/engineon` | 0/1 (ignored unless master switch is on) |
-| `commands/throttle` | 0–100 (panel sends 8 notches: multiples of 12.5) |
+| `commands/throttle` | 0–100. The panel sends 8 notches; because of integer `map()` the values are 0, 12, 25, 37, 50, 62, 75, 87, 100 (see #44). |
 | `commands/brake` | 0–100 |
 | `commands/reverser` | -1, 0, 1 |
 | `commands/headlights` | 0 off, 1 front, 2 rear, 3 both, 4 auto (follows reverser) |
